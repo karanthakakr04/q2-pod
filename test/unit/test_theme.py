@@ -437,7 +437,7 @@ def test_a_shadow_past_its_alphas_is_an_error():
 
 
 def test_classic_light_battery_offers_icon_percent_and_inside():
-    # icon (0) never gates; % Inside (3) is exempt under BATT_CLASSIC_LIGHT; Percent (1) at the bar's 21 px, 54 px
+    # icon (0) never gates; Percent Inside (3) is exempt under BATT_CLASSIC_LIGHT; Percent (1) at the bar's 21 px, 54 px
     # for 100%, with Wi-Fi, the play state and Bluetooth still ends before Classic's centred clock, and BATT_ROOM drops
     # it to the icon beside a wide codec badge
     n = theme.builtins()[1]

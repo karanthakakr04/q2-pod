@@ -519,7 +519,7 @@ def test_a_set_the_boot_cant_write_runs_minimal_until_the_next_boot(fw, library,
 
 @pytest.mark.xfail(strict=True, reason='BUG: settings_read checks each option against the theme stored in THEME '
                    'before theme_boot falls back to Minimal (st.theme = 0), so a stored Battery: Icon + Percent reads as '
-                   'Classic\'s default, % Inside, on a Minimal that takes Icon + Percent; the bar draws it and a press '
+                   'Classic\'s default, Percent Inside, on a Minimal that takes Icon + Percent; the bar draws it and a press '
                    'saves it over')
 @in_fork
 def test_a_boot_fallen_back_to_minimal_reads_the_settings_as_minimal_does(fw, library, tmp_path):
@@ -1239,8 +1239,8 @@ def test_control_device_volume_hands_the_volume_to_the_headset_and_follows_its_k
     assert headset.level == 64 and q2.var('g_volume').value == 55  # Off: each keeps its own
     q2.build('ringnav_btrows', 'bluetooth_page', 'scroll_view_bluetooth',  # System settings → Bluetooth
              *((f'stock_{i}', 'list_item', 'scroll_view_bluetooth') for i in range(4)))
-    q2.screen.click('Sync Device Volume')
-    assert q2.screen.switch('Sync Device Volume') == 'switch_on' and q2.flash.get('Q2POD', 'BTVOLLINK') == '1'
+    q2.screen.click('Control Device Volume')
+    assert q2.screen.switch('Control Device Volume') == 'switch_on' and q2.flash.get('Q2POD', 'BTVOLLINK') == '1'
     # the Q2's level sent, as the headset's nearest step, and the Q2's own gain full
     assert headset.level == nearest(55 * 127 / 100) and headset.gain[-1] == (100, 100)
     headset.level = 100  # its own keys: 100/127 of its range, 79 of the Q2's 100

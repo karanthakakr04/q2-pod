@@ -2808,15 +2808,18 @@ void *list_row(void *view, const char *icon, int (*click)(void *, void *), void 
 
 /* A settings row that opens a page, its label clear of the chevron. */
 static void *list_row_into(void *view, const char *icon, int (*click)(void *, void *), void *ctx) {
-    return list_row_core(view, icon, click, ctx, 202, 1);
+    return list_row_core(view, icon, click, ctx, 220, 1); /* laid out, 12 px before its ink */
 }
 
+static void value_row(void *label, const char *title, const char *value, int w);
+/* Classic's On or Off at 27 px, laid out 42 wide: a switch's title takes the rest */
+#define TOGGLE_VALUE_W 48
 /* Use the same trailing switch images and hit target as Shanling's settings rows: at screen x 302
  * whether the label sits in a settings button (x 20) or a full-width page row (page_row_detail,
  * peq_ui.c's). */
 void list_toggle(void *label, const char *title, int on) {
     if (theme()->set_text) {
-        list_value(label, title, on ? "On" : "Off");
+        value_row(label, title, on ? "On" : "Off", TOGGLE_VALUE_W);
         return;
     }
     void *button = P(label, W_PARENT);
@@ -2833,22 +2836,27 @@ void list_toggle(void *label, const char *title, int on) {
 }
 
 /* Classic's settings rows (set_text): the title left and the value right-aligned in the
- * trailing column, the title ending short of it. Switches read On or Off as values. */
-void list_value(void *label, const char *title, const char *value) {
+ * trailing column, w wide to screen x 356, the title's box ending where it starts. set_row moves
+ * both 5 px right and stops the value at 355, so a value has 136 px, a switch's 42. Switches read
+ * On or Off as values. */
+static void value_row(void *label, const char *title, const char *value, int w) {
     void *button = P(label, W_PARENT);
     void *text = widget_lookup(button, "_setting_value", 0);
     if (!text) {
-        int x = 302 - I(button, W_X) - 80;
-        text = hscroll_label_create(button, x, 0, 134, I(button, W_H));
+        int x = 356 - I(button, W_X) - w;
+        text = hscroll_label_create(button, x, 0, w, I(button, W_H));
         widget_set_name(text, "_setting_value");
         widget_use_style(text, "s_scrlabel_white20r");
         hscroll_label_set_only_focus(text, 1);
         hscroll_label_set_ellipses(text, 1);
-        widget_move_resize(label, I(label, W_X), 0, x - 8 - I(label, W_X), I(button, W_H));
+        widget_move_resize(label, I(label, W_X), 0, x - I(label, W_X), I(button, W_H));
     }
     widget_set_text_utf8(label, title);
     widget_set_text_utf8(text, value);
     theme_font(text, ROLE_TITLE, FONT_ROW);
+}
+void list_value(void *label, const char *title, const char *value) {
+    value_row(label, title, value, 142);
 }
 
 /* Under a set without stock's toolbars (toolbar 0) a page's switch is a row: stock's img_switch
@@ -3112,12 +3120,12 @@ int ringnav_quick_settings(void *win, void *ctx) {
  * Power's Volume guard (VOLGUARD, playback.c's wheel_guard; docs/internals.md#volume-guard), and
  * Display's Hold Return (HOLDRETURN, compact_now_playing; docs/ipod.md#hold-return), and Power's
  * Standby limit (STANDBYLIMIT, ringnav_standby; docs/internals.md#standby-limit), and Bluetooth's
- * Sync Device Volume (BTVOLLINK, bt_audio_ready; docs/internals.md#headset-controls-and-volume),
+ * Control Device Volume (BTVOLLINK, bt_audio_ready; docs/internals.md#headset-controls-and-volume),
  * and Power's Smart Wi-Fi (SMARTWIFI, smart_poll; docs/internals.md#smart-wi-fi), and Display's
  * Fast Navigation (BIGLIBRARY, Cover Flow's letters; docs/internals.md#coverflow-thumb) and
  * Playlist View (PLAYLISTCF).
  */
-/* Bluetooth's Sync Device Volume on: the Q2's volume is the device's own (bt_audio_ready). */
+/* Bluetooth's Control Device Volume on: the Q2's volume is the device's own (bt_audio_ready). */
 static int bt_vol_link __attribute__((section(".scratch")));
 #define STR_(x) #x
 #define STR(x) STR_(x)
@@ -3283,7 +3291,7 @@ static void pod_text(int i) {
         { "Standby Limit: Off", "Standby Limit: " STR(STANDBY_LIMIT_1) " h",
           "Standby Limit: " STR(STANDBY_LIMIT_2) " h",
           "Standby Limit: " STR(STANDBY_LIMIT_3) " h" },
-        { 0 }, /* Sync Device Volume: a switch */
+        { 0 }, /* Control Device Volume: a switch */
         { 0 }, /* Coverflow Sort's from coverflow.c */
         { "Refresh Cover Flow" },
         { 0 }, /* EQ per Output: a switch */
@@ -3315,7 +3323,7 @@ static void pod_text(int i) {
     const char *toggle = i == POD_CHARGE           ? "Charge Limit (" STR(CHARGE_STOP) "%)"
                          : i == POD_RESUME         ? "Resume on Connect"
                          : i == POD_VOL_GUARD      ? "Volume Guard"
-                         : i == POD_BT_LINK        ? "Sync Device Volume"
+                         : i == POD_BT_LINK        ? "Control Device Volume"
                          : i == POD_KEYTONE        ? "Key Tone"
                          : i == POD_CARMODE        ? "In-Vehicle Mode"
                          : i == POD_SMART_WIFI     ? "Smart Wi-Fi"
@@ -3358,7 +3366,7 @@ static int pod_click(void *ctx, void *event) {
     } else if (i == POD_KEYTONE) {
         g_keytone_flag = !g_keytone_flag;
         write_int_config(g_keytone_flag, "SYSSET", "KEYTONE");
-        /* Click in Headphones, built just after this row on Controls, shows while it is on. */
+        /* Click With Headphones, built just after this row on Controls, shows while it is on. */
         void *item = P(P(st.setting_label[9], W_PARENT), W_PARENT);
         widget_set_visible(item, g_keytone_flag != 0, 0);
         widget_layout(P(item, W_PARENT));
@@ -3380,7 +3388,7 @@ static int pod_click(void *ctx, void *event) {
         if (i == POD_CF_POSITION) coverflow_position_reset();
         if (i == POD_HIDE_STREAM || i == POD_HIDE_FOLDER) coverflow_home_layout();
         st.charge_at = 0;
-        /* Sync Device Volume: off, stock's gain back at once; on, bt_volume_poll's next pass
+        /* Control Device Volume: off, stock's gain back at once; on, bt_volume_poll's next pass
          * sends the Q2's level to the device. */
         if (i == POD_BT_LINK && mclGetOutputWay() == 1)
             headset_volume_reset(), device_set_volume(g_volume, 0);
@@ -3419,7 +3427,7 @@ int ringnav_powermanager(void *win, void *ctx) {
 }
 /* The Bluetooth page's list (stock's local builder, btmenu_rows), rebuilt whole on every search and
  * link change: its rows, five with Bluetooth on (one, the switch, off), then the device lists.
- * With Bluetooth on, Resume on connect and Sync Device Volume follow the fourth, Bluetooth
+ * With Bluetooth on, Resume on connect and Control Device Volume follow the fourth, Bluetooth
  * Headset Volume Control (bt_adjvol), each time, iconless and 78 high as stock's rows. */
 int ringnav_btrows(void *win, void *ctx) {
     static const char *const icons[] = { 0 };
@@ -4003,7 +4011,7 @@ static void bar_sync(void *bar) {
     if (st.home_rockbox != rockbox_available() ||
         (shortcut() == SHORTCUT_GROOVEBOX && st.home_groovebox != groovebox_available()))
         coverflow_home_layout();
-    /* Classic's battery: the set's body, which % Inside keeps */
+    /* Classic's battery: the set's body, which Percent Inside keeps */
     const theme_t *T = theme(), *B = bar_theme();
     /* The look's rows off the row layout's, y 0 in every set's row. A relayout puts them back
      * there; this pass corrects them before the frame draws them. */
@@ -4031,7 +4039,7 @@ static void bar_sync(void *bar) {
         /* Classic: the play state shares the group */
         if (classic_row && st.bar_state && widget_get_visible(st.bar_state))
             reach += I(st.bar_state, W_W) + STATUS_GAP;
-        /* Classic's % Inside is the icon's own width: the icon would win no room */
+        /* Classic's Percent Inside is the icon's own width: the icon would win no room */
         if (reach > BATT_ROOM && !(classic_light && mode == 3)) mode = 0;
     }
     widget_set_visible(st.bar_icon, 0, 0);
@@ -6489,7 +6497,8 @@ int ringnav_image_add(void *manager, const char *name, void *bitmap) {
 static void setting_text(int i) {
     static const char *const home[] = { "Home: Split", "Home: Full", "Home: Carousel" },
                              *const battery[] = { "Battery: Icon", "Battery: Percent",
-                                                  "Battery: Icon + Percent", "Battery: % Inside" },
+                                                  "Battery: Icon + Percent",
+                                                  "Battery: Percent Inside" },
                              *const light[] = { "Light Mode: Off", "Light Mode: On",
                                                 "Light Mode: Auto" };
     int a = accent();
@@ -6526,9 +6535,9 @@ static void setting_text(int i) {
         row_label(st.setting_label[i], text);
         return;
     }
-    static const char *const toggles[] = { "Rounded Corners",     0,
-                                           "Smart Awake",         "Centred Now Playing",
-                                           "Click in Headphones", "Single Press Scrub",
+    static const char *const toggles[] = { "Rounded Corners",       0,
+                                           "Smart Awake",           "Centred Now Playing",
+                                           "Click With Headphones", "Single Press Scrub",
                                            "Time in Title" };
     if (i == 5 || i >= 7) {
         list_toggle(st.setting_label[i], toggles[i - 5], *setting_values[i]);
@@ -6583,7 +6592,7 @@ static int setting_click(void *ctx, void *event) {
     const theme_t *T = theme();
     int *value = option_slot(T, i), was = *value;
     const char *key = option_key(T, i);
-    /* Rockbox, Favorites, Shuffle, Rated, Playlists, Artists, Albums, Games, Podcasts,
+    /* Rockbox, Favorites, Shuffle, Rated Albums, Playlists, Artists, Albums, Games, Podcasts,
      * Audiobooks, Groovebox (skipped unless the card has it; Rockbox is always offered), None */
     static const int shortcut_next[] = {
         3, 2, 6, 5, 7, 4, 8, 1, 9, SHORTCUT_GROOVEBOX, SHORTCUT_NONE, 0
@@ -6914,7 +6923,7 @@ int ringnav_display(void *win, void *ctx) {
     pod_rows(win, "scroll_view_display", POD_HOLD_HOME, 1, hold_icon);
     setting_row(view, 10);
     pod_rows(win, "scroll_view_display", POD_KEYTONE, 1, tone_icon);
-    setting_row(view, 9); /* Click in Headphones shows while Key Tone is on */
+    setting_row(view, 9); /* Click With Headphones shows while Key Tone is on */
     widget_set_visible(P(P(st.setting_label[9], W_PARENT), W_PARENT), g_keytone_flag != 0, 0);
     widget_set_tr_text(list_row_into(view, "system_keylock", keylock_open, 0), "system_keylock");
     pod_rows(win, "scroll_view_display", POD_WAKE, 1, lock_icon);
@@ -10361,7 +10370,7 @@ int ringnav_wm_paint(void *wm) {
  * (system("cmd_mcu write_str buzzer") when g_keytone_flag is set). Silent while headphones (either
  * jack) or a Bluetooth or USB output listen, since the buzzer is the device's own speaker;
  * hciplayer holds their PCM, so the click has no other way out. Playback alone leaves it clicking.
- * Click in Headphones (IPOD KEYTONEHP, off) keeps the buzzer clicking there too, as stock does;
+ * Click With Headphones (IPOD KEYTONEHP, off) keeps the buzzer clicking there too, as stock does;
  * Key Tone off is still silent.
  * The command waits out the buzzer and the MCU's park (tools/mcu_pwm_clock.c), so it runs on a
  * worker, not the UI thread; a click while one sounds is dropped, as the buzzer is busy anyway.

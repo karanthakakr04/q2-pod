@@ -1809,8 +1809,8 @@ def test_classic_shows_a_switch_as_its_value(fw, st):
     assert f'{O["CHARGE_STOP"]}%' in ui.text(label_of(charge))
     v = next(c for c in charge.walk() if c.name == '_setting_value')
     title, width = label_of(charge), charge.children[0].box[2]
-    # the value in the trailing column to the row's end, the title ending short of it
-    assert title.box[0] + title.box[2] < v.box[0] and width // 2 < v.box[0] and v.box[0] + v.box[2] >= width
+    # the value in the trailing column to the row's end, the title's box ending where it starts
+    assert title.box[0] + title.box[2] == v.box[0] and width // 2 < v.box[0] and v.box[0] + v.box[2] >= width
     assert ui.text(label_of(standby)).endswith('Off') and value(ui, standby) is None  # not a switch: its text whole
     click(ui, charge)
     assert value(ui, charge) == 'Off' and len([c for c in charge.walk() if c.name == '_setting_value']) == 1
@@ -1831,7 +1831,7 @@ def test_bluetooth_adds_resume_and_device_volume_after_its_fourth_row(fw, bt):
     assert [r.name for r in rows[:4] + rows[6:]] == [f's{i}' for i in range(7)]
     for r in ours:
         click(ui, r)
-    assert [key for key, _ in settings.written] == ['RESUME', 'BTVOLLINK']  # Resume on Connect, Sync Device Volume
+    assert [key for key, _ in settings.written] == ['RESUME', 'BTVOLLINK']  # Resume on Connect, Control Device Volume
     assert [r.box[3] for r in ours] == [rows[0].box[3]] * 2
     beside = ui.add('scroll_view', win, (0, 0, 375, 100), 'beside')  # a settings row with an icon
     with_icon = ui.nodes[fw.fn('list_row', C.c_void_p, C.c_void_p, C.c_char_p, C.c_void_p, C.c_void_p)(beside.addr, b'icon', None, None)]
@@ -1846,7 +1846,7 @@ def test_device_volume_off_gives_stock_its_gain_back_at_once(fw, way, sent):
     g(fw, 'g_volume', 37)
     fw.mock('mclGetOutputWay', lambda *_: way)
     fw.fn('ringnav_btrows', C.c_int, C.c_void_p, C.c_void_p)(win.addr, None)
-    link = row(ui, view, 'Sync Device Volume')
+    link = row(ui, view, 'Control Device Volume')
     bt_link = fw.fn('navigation__bt_link', C.c_int)
     assert switch(link) == 'switch_on' and bt_link() == 1
     click(ui, link)
@@ -2001,7 +2001,7 @@ def test_key_tone_shows_click_with_headphones_while_on(fw, st, scratch, was):
     item = ui.add('list_item', view, (0, 0, 375, 70), 'click_hp')
     button = ui.add('button', item, (20, 0, 335, 70))
     hp = ui.add('hscroll_label', button, (72, 0, 260, 70))
-    slot = scratch['setting_label'] + SETTING['SETTING_KEYTONEHP'] * C.sizeof(C.c_void_p)  # Click in Headphones' label
+    slot = scratch['setting_label'] + SETTING['SETTING_KEYTONEHP'] * C.sizeof(C.c_void_p)  # Click With Headphones' label
     C.c_void_p.from_address(C.addressof(fw.var('st', C.c_char)) + slot).value = hp.addr
     tone = view.children[0]
     assert switch(tone) == ('switch_on' if was else 'switch_off')
@@ -2037,7 +2037,7 @@ def test_a_set_text_rows_title_and_value(fw, text, title, val):
     assert (ui.text(label), ui.text(v)) == (title, val)
     (lx, ly, lw, lh), (vx, vy, vw, vh), width = label.box, v.box, button.box[2]
     assert (lx, ly, lh) == (72, 0, 70) and (vy, vh) == (0, 70)  # the title where it was, both the row's height
-    assert lx + lw < vx and width // 2 < vx and vx + vw >= width  # the value trailing to the row's end, clear of the title
+    assert lx + lw == vx and width // 2 < vx and vx + vw >= width  # the value trailing to the row's end, the title's box up to it
     assert [c[1][:2] for c in fw.calls('hscroll_label_set_only_focus')] == [(v.addr, 1)]  # scrolls only focused
     assert [c[1][:2] for c in fw.calls('hscroll_label_set_ellipses')] == [(v.addr, 1)]
 

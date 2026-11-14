@@ -456,8 +456,8 @@ def test_shortcut_cycles_in_its_menu_order(fw):
     ui = Ui(fw)
     page = appearance(fw, ui, SHORTCUT=b'0')
     seen = clicks_of(fw, ui, page, 'Shortcut', 11)
-    # Rockbox, Favorites, Shuffle, Rated, Playlists, Artists, Albums, Games, Podcasts, Audiobooks, None, Rockbox
-    assert [v for v, _ in seen] == ['Favorites', 'Shuffle', 'Rated', 'Playlists', 'Artists', 'Albums', 'Games',
+    # Rockbox, Favorites, Shuffle, Rated Albums, Playlists, Artists, Albums, Games, Podcasts, Audiobooks, None, Rockbox
+    assert [v for v, _ in seen] == ['Favorites', 'Shuffle', 'Rated Albums', 'Playlists', 'Artists', 'Albums', 'Games',
                                     'Podcasts', 'Audiobooks', 'None', 'Rockbox']
     assert [w for _, w in seen] == [[('SHORTCUT', v)] for v in (3, 5, 4, 7, 1, 2, 6, 8, 9, 11, 0)]
 
@@ -477,7 +477,7 @@ def test_home_cycles_split_full_carousel(fw):
 def test_classic_battery_takes_only_its_three_styles(fw):
     ui = Ui(fw)
     page = appearance(fw, ui, THEME=b'1')
-    assert clicks_of(fw, ui, page, 'Battery', 3) == [('Percent', [('BATTERY', 1)]), ('% Inside', [('BATTERY', 3)]),
+    assert clicks_of(fw, ui, page, 'Battery', 3) == [('Percent', [('BATTERY', 1)]), ('Percent Inside', [('BATTERY', 3)]),
                                                      ('Icon', [('BATTERY', 0)])]
 
 
@@ -740,10 +740,10 @@ def test_controls_opens_display_as_its_own_page(fw, keytone):
     ui.click(button_of(settings.view, 'Controls'))
     assert page.title() == 'Controls'
     found = titles(page.view())
-    assert found[:3] == ['Sensitivity', 'Hold Return', 'Single Press Scrub']
-    assert 'Click in Headphones' in found and 'system_keylock' in found
-    # Click in Headphones shows only while Key Tone is on
-    assert button_of(page.view(), 'Click in Headphones').parent.visible == keytone
+    assert found[:3] == ['Wheel Sensitivity', 'Hold Return', 'Single Press Scrub']
+    assert 'Click With Headphones' in found and 'system_keylock' in found
+    # Click With Headphones shows only while Key Tone is on
+    assert button_of(page.view(), 'Click With Headphones').parent.visible == keytone
     # Key Lock opens stock's page
     opened = []
     fw.mock('navigator_to', lambda name, *_: opened.append(C.string_at(name).decode()))

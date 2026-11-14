@@ -63,7 +63,7 @@ void xfade_row(void *label) {
 
 static void wheel_text(void *label) {
     char t[32];
-    tk_snprintf(t, sizeof t, "Sensitivity: %d%%", wheel_pct());
+    tk_snprintf(t, sizeof t, "Wheel Sensitivity: %d%%", wheel_pct());
     widget_set_text_utf8(label, t);
 }
 
@@ -88,8 +88,8 @@ int resume_min(void) {
 }
 
 static void rs_text(void *label) {
-    char t[32] = "Resume: Off";
-    if (resume_min()) tk_snprintf(t, sizeof t, "Resume: %d min", resume_min());
+    char t[32] = "Resume Songs: Off";
+    if (resume_min()) tk_snprintf(t, sizeof t, "Resume Songs: %d min", resume_min());
     widget_set_text_utf8(label, t);
 }
 
@@ -388,8 +388,8 @@ int xfade_open(void *ctx, void *event) {
     widget_on(xf.slider, EVT_VALUE_CHANGED, slid, 0);
     widget_on(page, EVT_DESTROY, gone, page);
     widget_set_text_utf8(title, mode == 3   ? "Night Shift"
-                                : mode == 2 ? "Resume"
-                                : wheel     ? "Sensitivity"
+                                : mode == 2 ? "Resume Songs"
+                                : wheel     ? "Wheel Sensitivity"
                                             : "Crossfade");
     /* Stock shows and enables it only while Boot volume's switch is on: disabled, touch misses the
      * slider and +/- (#140). */

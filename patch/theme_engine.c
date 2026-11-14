@@ -105,7 +105,7 @@ int geom_val(int v) { return geom_vals[st.geom][v]; }
 int client_h(void) { return 320 - geom_val(V_BAR); }
 /* The Display rows' settings, by ringnav_display's index: 0 Accent, 1 Home (0 Split, 1 Full,
  * 2 Carousel), 2 Battery, 3 Theme, 4 Shortcut, 5 Corners, 6 Light Mode, 7 Smart Awake, 8 Centred
- * Now Playing, 9 Click in Headphones (Controls, under Key Tone), 10 Single Press Scrub, 11 Time
+ * Now Playing, 9 Click With Headphones (Controls, under Key Tone), 10 Single Press Scrub, 11 Time
  * in Title; 12 on: a theme's own options, SETTING_OWN + k for theme_keys[k]. */
 static const char *const setting_keys[] = { "ACCENT",    "HOME",      "BATTERY",     "THEME",
                                             "SHORTCUT",  "ROUNDED",   "LIGHT",       "KEEPLIT",
@@ -314,7 +314,7 @@ const char *ipod_home_shortcut(void) {
                                          "Artists",
                                          "Albums",
                                          "Favorites",
-                                         "Rated",
+                                         "Rated Albums",
                                          "Shuffle",
                                          "Games",
                                          "Playlists",
