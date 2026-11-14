@@ -958,7 +958,7 @@ static void sh_text(int r) {
     else if (armed && sh_state(i) == ST_INSTALLED)
         t = "Press again to remove";
     else if (armed) /* docs/boot.md#rockbox */
-        t = "Starts at power-on; see Boot to. Press again";
+        t = "Starts at power-on. Press again to install";
     else
         t = states[sh_state(i)];
     widget_set_text_utf8(widget_get_child(sh.row[r], 1), t);
