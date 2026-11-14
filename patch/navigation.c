@@ -654,7 +654,7 @@ int usable(void) {
         return 0;
     void *top = window_manager_get_top_window(window_manager());
     int confirm = top && !tk_strcmp(widget_get_prop_str(top, "name", ""), "confirminfo_dialog");
-    /* A held power key sets g_poweroff_state to 1 while its Confirm Shutdown prompt is up
+    /* A held power key sets g_poweroff_state to 1 while its Shut Down? prompt is up
      * (on_wm_keylong_fun); 2 is the power-off page itself. */
     if (g_poweroff_state) return confirm;
     if (g_usblink_status != 2) return 1;
@@ -3292,7 +3292,7 @@ static void pod_text(int i) {
           "Standby Limit: " STR(STANDBY_LIMIT_2) " h",
           "Standby Limit: " STR(STANDBY_LIMIT_3) " h" },
         { 0 }, /* Control Device Volume: a switch */
-        { 0 }, /* Coverflow Sort's from coverflow.c */
+        { 0 }, /* Sort's from coverflow.c */
         { "Refresh Cover Flow" },
         { 0 }, /* EQ per Output: a switch */
         { 0 }, /* Key Tone: a switch */
@@ -3348,7 +3348,7 @@ static void pod_text(int i) {
 /* Centre or tap toggles and saves. Charge limit takes effect on the next UI loop pass
  * (power_poll), Smart Wi-Fi within SMART_POLL_MS; Artists on the next load of an artist list, as
  * the artist page's switch does; Fast Navigation's letters at the next spin, its half copies at
- * Cover Flow's next idle pass; Standby limit at the next Standby; Coverflow Sort and Refresh
+ * Cover Flow's next idle pass; Standby limit at the next Standby; Sort and Refresh
  * Coverflow at Coverflow's next open (coverflow.c), Refresh with a toast, as it changes nothing in
  * view. */
 static int pod_click(void *ctx, void *event) {
@@ -6860,7 +6860,7 @@ static void setting_row(void *view, int i) {
  * opening its slider page, crossfade.c) join them, then Appearance and Coverflow, each opening
  * stock's page again (display_open) with its stock rows dropped and its own instead: Theme, Light
  * Mode, Accent, Corners, Home, Shortcut, Battery, Time in Title, Centred Now Playing; Artist View,
- * Coverflow Sort and Refresh Coverflow. Controls is System settings' row (ringnav_systemset) on the
+ * Sort and Refresh Cover Flow. Controls is System settings' row (ringnav_systemset) on the
  * same page: the wheel, the buttons and what the buttons do. The value rows show it in the label
  * and have no chevron, since they change in place. ponytail: stock's page opened over itself; its
  * own rows' state is never touched on a sub-page. */

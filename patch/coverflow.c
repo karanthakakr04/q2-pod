@@ -672,7 +672,7 @@ static void drop_unknown(void) {
     deque_destroy(songs);
 }
 
-/* Sort, Display settings' Coverflow Sort and the rated albums' card
+/* Sort, Cover Flow settings' Sort and the rated albums' card
  * (docs/internals.md#coverflow-sort): Album is the stock order;
  * Artist sorts by artist without a leading article, as every library list does (ringnav_sort_key),
  * then year, then album; Year in Playback settings' Year order (year_sql), undated last; Recently Added by the newest song's time_create; Most Played by the
@@ -2951,7 +2951,7 @@ static struct {
 static void load_albums(unsigned t0) {
     int on_sort = cf.on_sort; /* taken whatever this load shows */
     cf.on_sort = 0;
-    if (cf.resort && !cf.scoped) { /* Coverflow Sort changed: its order read again */
+    if (cf.resort && !cf.scoped) { /* Sort changed: its order read again */
         cf.resort = cf.sort_read = 0;
         if (cf.albums && cf.albums != cf.stock) deque_destroy(cf.albums);
         cf.albums = 0;
@@ -3483,7 +3483,7 @@ static int sort_saved(void) {
     return SORT_ALBUM;
 }
 
-/* Display settings' Coverflow Sort: its label ("Sort: Album"), and a press's next order, saved,
+/* Cover Flow settings' Sort: its label ("Sort: Album"), and a press's next order, saved,
  * which Coverflow takes at its next open (load). */
 const char *coverflow_sort_name(void) { return sort_names[sort_saved()]; }
 void coverflow_sort_step(void) {

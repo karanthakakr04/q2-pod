@@ -55,7 +55,7 @@
   </tr>
   <tr valign="top">
     <td><b>App Store</b></td>
-    <td>Installs and updates Rockbox, its themes, Spotify and the <a href="#apps">card apps</a> over Wi-Fi. Network Update installs new Q2 Pod releases.</td>
+    <td>Installs and updates Rockbox, its themes, Spotify and the <a href="#apps">card apps</a> over Wi-Fi. Network update installs new Q2 Pod releases.</td>
   </tr>
   <tr valign="top">
     <td><b>Scrobbling</b></td>
@@ -103,13 +103,13 @@
 | **Wheel**           | Scroll. Spin faster to speed up. Adjust a slider when one is open.          |
 | **Centre**          | Open the selected item. Double-press to turn the screen off.                |
 | **Hold Play/Pause** | View the playing queue, or open track, playlist and shuffle/repeat options. |
-| **Hold Return**     | Jump to Now Playing; hold again to go back. Display can make it go Home.    |
+| **Hold Return**     | Jump to Now Playing; hold again to go back. Controls can make it go Home.   |
 
 The [user guide][guide] covers every control, EQ, Cover Flow and more tips.
 
 ## Updating
 
-- **Over Wi-Fi:** **System settings → System Update → Network Update** downloads the newest release to the card, checks it against the release's SHA-256, and only then replaces the card's `update.tar` and opens the TF card update's confirmation. Press the row again to cancel the download. If the connection drops, it tries again by itself, and the next press carries on from where it stopped. While Wi-Fi is on, the Q2 checks for a new release once a day and says so on Home, once per release; the row then reads **Update to** and the version. **Update Notifications**, under Network Update, turns that check off.
+- **Over Wi-Fi:** **System settings → System Update → Network update** downloads the newest release to the card, checks it against the release's SHA-256, and only then replaces the card's `update.tar` and opens the TF card update's confirmation. Press the row again to cancel the download. If the connection drops, it tries again by itself, and the next press carries on from where it stopped. While Wi-Fi is on, the Q2 checks for a new release once a day and says so on Home, once per release; the row then reads **Update to** and the version. **Update Notifications**, under Network update, turns that check off.
 - **By hand:** repeat the [install steps](#install) with the newest release.
 
 Your settings, ratings and play counts are kept. The updater skips a version that's already installed, so a newer release always goes on.
@@ -174,6 +174,11 @@ Your settings, ratings and play counts are kept. The updater skips a version tha
     <td>Sixteen pads, a step sequencer and punch-in effects, in <b>Library → Games</b>.</td>
     <td><a href="https://github.com/DiamondBond/q2-groovebox/raw/main/docs/guide/Groovebox-Mini-Guide.pdf">Guide</a></td>
   </tr>
+  <tr valign="top">
+    <td><b><a href="https://github.com/group-a-study/q2-airplay">AirPlay</a></b></td>
+    <td>Send what the Q2 plays to AirPlay speakers: choose <b>AirPlay</b> at the top of Now Playing's <b>⋯</b>.</td>
+    <td></td>
+  </tr>
 </table>
 
 <details>
@@ -201,12 +206,12 @@ The [user guide][guide] has the steps for each.
 <details>
 <summary><h2>Library</h2></summary>
 
-Copy your music to the card over USB-C, then run **Library → Update Local Music** on the Q2.
+Copy your music to the card over USB-C, then run **Library → Update Library → Scan music now** on the Q2.
 
 - **More than music:** these folders at the card's root each add their own Library entry: `Podcasts/`, `Audiobooks/`, `Photos/`, `Books/` and `Videos/`. `EQ/` holds EQ presets to import. See the [user guide][guide] for supported formats.
 - **Playlists:** M3U playlists import from the `_explaylist_data/` folder at the card's root, the same folder stock uses. Q2 Pod keeps it as it is, so your stock playlists carry over.
 - **Long audiobooks:** a book too long for the Q2's memory (around 40 hours in one file) needs splitting into parts.
-- **Hiding a folder:** to keep a folder out of Songs, Albums, Artists, Cover Flow and library shuffle, put an empty file named `database.ignore` in it and run **Update Local Music** again. Its songs still play from Folder view and from playlists, and an empty `database.unignore` in a subfolder lets that subfolder back in ([details](docs/discovery.md)).
+- **Hiding a folder:** to keep a folder out of Songs, Albums, Artists, Cover Flow and library shuffle, put an empty file named `database.ignore` in it and run **Update Library** again. Its songs still play from Folder view and from playlists, and an empty `database.unignore` in a subfolder lets that subfolder back in ([details](docs/discovery.md)).
 
 </details>
 

@@ -71,7 +71,7 @@ static int wh_acc __attribute__((section(".scratch")));
 static int wh_anchor __attribute__((section(".scratch"))); /* touch-down x (1-200); 0 lifted */
 static int wh_units __attribute__((section(".scratch")));  /* wh_acc's tick, both in 1/16 unit */
 
-/* Wheel sensitivity (System settings -> Display, crossfade.c's page): 10-200% in tens, Q2POD
+/* Wheel sensitivity (System settings -> Controls, crossfade.c's page): 10-200% in tens, Q2POD
  * WHEELSENSITIVITY in config.ini, anything else 50%. The travel per tick is 50% / sensitivity of
  * WHEEL_TICK_UNITS: 50% is today's 28 (a seventh of a turn), 100% 14, 200% 7, 1.0.6's scale and
  * key, so a value saved then means what it did (within the half unit 1.0.6 rounded to). It is kept

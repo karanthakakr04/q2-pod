@@ -35,8 +35,8 @@ enum {
     POD_HOLD_HOME,
     POD_STANDBY,
     POD_BT_LINK,
-    POD_CF_SORT,    /* Display's Coverflow Sort: coverflow.c's SORT_FILE, not config.ini */
-    POD_CF_REFRESH, /* and Refresh Coverflow, an action */
+    POD_CF_SORT,    /* Cover Flow's Sort: coverflow.c's SORT_FILE, not config.ini */
+    POD_CF_REFRESH, /* and Refresh Cover Flow, an action */
     POD_EQ_OUTPUT,  /* EQ per Output: the value and key; its row is Advanced EQ's (peq_ui.c) */
     POD_KEYTONE, /* Key Tone and In-Vehicle Mode: stock's bytes and SYSSET keys, as its rows did */
     POD_CARMODE,
