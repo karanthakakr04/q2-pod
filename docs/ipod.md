@@ -221,7 +221,7 @@ In Icon and Icon + Percent, charging fills the icon solid green (`BATT_CHARGE_RG
 `BATT_LOW_RGB` (`#FF1448`) under every accent. Saved Battery values keep their existing meanings.
 Minimal's bar is black, or Light Mode's paper; Modern's black, or `LIGHT_BAR`'s grey; Classic's is its gloss, with a battery of its own ([Theme](#theme)). Every mode fits with ordinary Bluetooth and Wi-Fi, with at least
 4 pixels (`CLOCK_GAP`) before the widest clock text (`BATT_ROOM`, 94 pixels from the margin).
-Wide codec badges temporarily show the icon alone until they fade.
+Wide codec badges temporarily show the icon alone until they fade. The check (`bar_sync`) takes the percentage at the width its face draws 100% (`pct_width`; `BATT_PCT_W`, 42, until the first paint has measured it, and that paint asks for the bar again): 36 px in the built-in bar's face and 37 in Classic's at the bar's 21 px, so Classic's Percent fits beside Bluetooth, Wi-Fi and the play state (91 px). The room is the built-in bar's and the widest clock's whatever the bar. Under Minimal or Modern with **Status Bar: Classic**, Icon + Percent beside both Bluetooth and Wi-Fi needs 99 px (Classic's 27 px battery), so it is drawn as Percent Inside there, the icon's own width, which keeps the number; with one of the two it fits and stays beside the icon.
 
 The navbar is hidden, as on the local pages, on the settings pages
 (`systemset/*`, `playset/*`), `audiosetting_page` and `stream_page`, listed in

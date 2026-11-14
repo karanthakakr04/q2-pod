@@ -4045,9 +4045,12 @@ static void bar_sync(void *bar) {
         inside = classic_light ? body : BATT_INSIDE_W;
     int mode = st.battery;
     if (mode) {
-        int reach = mode == 1   ? BATT_PCT_W
+        /* the widest the face in use draws it: Classic's 100% is 37 px, which fits beside
+         * Bluetooth, Wi-Fi and the play state where BATT_PCT_W, the stand-in, did not */
+        int pct = pct_width(100);
+        int reach = mode == 1   ? pct
                     : mode == 3 ? inside + BATT_NUB_W
-                                : body + BATT_NUB_W + BATT_GAP + BATT_PCT_W;
+                                : body + BATT_NUB_W + BATT_GAP + pct;
         if (widget_get_visible(st.bar_wifi)) reach += I(st.bar_wifi, W_W) + STATUS_GAP;
         if (shown)
             reach +=
@@ -4056,8 +4059,10 @@ static void bar_sync(void *bar) {
         /* Classic: the play state shares the group */
         if (classic_row && st.bar_state && widget_get_visible(st.bar_state))
             reach += I(st.bar_state, W_W) + STATUS_GAP;
-        /* Classic's Percent Inside is the icon's own width: the icon would win no room */
-        if (reach > BATT_ROOM && !(classic_light && mode == 3)) mode = 0;
+        /* Classic's Percent Inside is the icon's own width: the icon would win no room, and
+         * Icon + Percent with none becomes it, which keeps the number */
+        if (reach > BATT_ROOM && !(classic_light && mode == 3))
+            mode = classic_light && mode == 2 ? 3 : 0;
     }
     widget_set_visible(st.bar_icon, 0, 0);
     widget_set_visible(st.bar_pct, 0, 0);
@@ -4228,6 +4233,8 @@ static void paint_battery(void *w, void *canvas) {
         st.pct_sign = (int)(canvas_measure_text(canvas, &c, 1) + 0.5f);
     }
     if (st.batt_mode == 1) {
+        /* bar_sync fitted the mode to BATT_PCT_W: again, with these */
+        if (!st.bar_timer) st.bar_timer = timer_add(bar_repaint, (void *)0, 0);
         rect_t r = { 0, 0, I(w, W_W), I(w, W_H) };
         draw_centred(canvas, s, n, &r, px, color);
         return;

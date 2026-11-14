@@ -646,6 +646,51 @@ def test_the_first_paint_measures_the_digits_and_the_slot_fits_them(fw, st, ui):
     assert widths == {'5%': digit + sign, '88%': 2 * digit + sign, '100%': 3 * digit + sign}
 
 
+def crowded(fw, ui, bar):
+    """The device's row with everything showing: Bluetooth's 43 px canvas with the plain glyph, Wi-Fi's 14, the play
+    state's 18 (tools/ipod.py STATE_W), which Classic's group holds."""
+    ui.place(bar.bt, 0, 0, 43, 22)
+    ui.place(bar.wifi, 0, 0, 14, 22)
+    ui.place(bar.state, 0, 0, 18, 22)
+    ui.shown[bar.wifi] = 1
+    fw.mock('mclGetPlayStatus', lambda *_: 2)
+
+
+def test_classics_percent_shows_beside_bluetooth_wifi_and_the_play_state(fw, st, ui):
+    """Classic's 100% is 37 px (8 a digit, 13 the sign, at the bar's 21 px), and with every icon it ends inside the
+    room. The room check took BATT_PCT_W, 42, the built-in bar's stand-in, and turned Percent to the icon."""
+    theme(fw, st, CLASSIC, BATTERY=1)
+    bar = Bar(fw, ui)
+    crowded(fw, ui, bar)
+    st.pct_digit, st.pct_sign = 8, 13  # as the first paint measures them
+    canvas = Paint(fw, ui, bar)()
+    assert ui.shown[bar.state] and st.batt_mode == 1 and [x[0] for x in canvas.texts] == ['88%']
+    assert slot_width(ui, bar) == 2 * 8 + 13
+
+
+def test_the_first_measure_asks_for_the_bar_again_and_percent_takes_its_room(fw, st, ui):
+    """Until a paint has measured the face the check stands on BATT_PCT_W, which is the icon in a crowded Classic
+    row: the measuring paint asks for the bar again, and that pass fits Percent."""
+    theme(fw, st, CLASSIC, BATTERY=1)
+    bar = Bar(fw, ui)
+    crowded(fw, ui, bar)
+    paint = Paint(fw, ui, bar)
+    paint()  # Canvas measures '0' 9.4 px and '%' 12.6: 100% is 40, and 94 with the icons, the room to the pixel
+    assert st.batt_mode == 0 and (st.pct_digit, st.pct_sign) == (9, 13) and len(ui.due('bar_repaint')) == 1
+    ui.run_all('bar_repaint')
+    assert [x[0] for x in paint().texts] == ['88%'] and st.batt_mode == 1
+
+
+def test_a_wide_codec_badge_still_turns_classics_percent_to_the_icon(fw, st, ui):
+    theme(fw, st, CLASSIC, BATTERY=1)
+    bar = Bar(fw, ui)
+    crowded(fw, ui, bar)
+    ui.set_str(bar.bt, b'image', b'bar_ldac')
+    st.pct_digit, st.pct_sign = 8, 13
+    canvas = Paint(fw, ui, bar)()
+    assert st.batt_mode == 0 and canvas.texts == []
+
+
 def icon_parts(canvas, level_h):
     """The stock icon's rects: its level (the one level_h high), its nub (rightmost) and its outline's box."""
     level = [r for r in canvas.rects if r[3] == level_h]
@@ -744,6 +789,24 @@ def test_status_bar_classic_keeps_the_digits_the_row_has_room_for(fw, st, ui):
     assert (text, px) == ('100%', O['BATT_PX'])  # the theme's size, which BATT_PCT_W reserves, not Classic's 21
     # beside them the body rises to the digits' ink, as the flat icon does
     assert min(r[1] for r in canvas.rects) == (row_h(MINIMAL) + 1 - SETS[GEOM['Classic']].batt_h) // 2 - O['BATT_PCT_DY']
+
+
+@pytest.mark.parametrize('t', [MINIMAL, MODERN])
+def test_status_bar_classic_puts_the_number_inside_when_icon_and_percent_has_no_room(fw, st, ui, t):
+    """Classic's battery is 27 px to the flat one's 16: beside Bluetooth and Wi-Fi it and 100% need 99 px of the 94.
+    The number goes inside the battery, as Classic's own Battery reads a stored Icon + Percent, where it was dropped
+    for the plain icon; with Wi-Fi alone both fit and it stays beside."""
+    theme(fw, st, t, BATTERY=2, STATUSBAR=3)
+    bar = Bar(fw, ui)
+    ui.place(bar.bt, 0, 0, 43, 22)
+    ui.place(bar.wifi, 0, 0, 14, 22)
+    ui.shown[bar.wifi] = 1
+    st.pct_digit, st.pct_sign = 8, 12  # the built-in bar's face at 16 px
+    paint = Paint(fw, ui, bar)
+    assert [x[0] for x in paint().texts] == ['88', '88'] and st.batt_mode == 3  # dark on the level, white past it
+    assert slot_width(ui, bar) == SETS[GEOM['Classic']].batt_w + 1 + NUB_W
+    ui.shown[bar.bt] = 0
+    assert [x[0] for x in paint().texts] == ['88%'] and st.batt_mode == 2
 
 
 @pytest.mark.parametrize('t, look, image', [(CLASSIC, 1, b'bar_play'), (CLASSIC, 2, b'bar_play'), (MINIMAL, 3, b'classic_light_play_d')])
