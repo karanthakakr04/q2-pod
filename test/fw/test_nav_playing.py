@@ -1021,18 +1021,39 @@ def test_modern_names_the_page_in_its_bold_and_the_clock_goes_back_to_stocks_fac
     st.np_win = top = window(ui, 'playing_page')
     bar_title(fw, bar, top)
     assert ui.prop(bar.clock, b'style:normal:font_name') == b'bold'
-    bar_title(fw, bar, window(ui, 'home_page', 'Q2', navbar_shown=1))
+    bar_title(fw, bar, window(ui, 'games_page', 'Games', navbar_shown=1))
     assert ui.prop(bar.clock, b'style:normal:font_name') == b'default' and len(ui.due('clock_due')) == 1
 
 
 def test_modern_clock_loses_a_cjk_titles_bold_mark_when_the_title_goes(fw, st, ui):
-    """A CJK page's name falls back to stock's face, kept bold by the mark; going Home the clock is plain."""
+    """A CJK page's name falls back to stock's face, kept bold by the mark; on a page with its own navbar the clock
+    is plain."""
     theme(fw, st, MODERN, TIMETITLE=0)
     bar = Bar(fw, ui)
     bar_title(fw, bar, window(ui, 'artist_page', '专辑'))
     assert ui.prop(bar.clock, b'_q2_bold_fallback') == 1
-    bar_title(fw, bar, window(ui, 'home_page', 'Q2', navbar_shown=1))
+    bar_title(fw, bar, window(ui, 'games_page', 'Games', navbar_shown=1))
     assert ui.prop(bar.clock, b'_q2_bold_fallback') == 0
+
+
+@pytest.mark.parametrize('wordmark, want', [(1, 'Q2 Pod'), (0, '')])
+def test_home_is_named_as_classics_and_shows_no_clock(fw, st, ui, wordmark, want):
+    """Off takes the clock off Home too: its title is Q2 Pod, or nothing with Show Wordmark off."""
+    theme(fw, st, TIMETITLE=0, SHOWQ2POD=wordmark)
+    bar = Bar(fw, ui)
+    home = window(ui, 'home_page')
+    bar_title(fw, bar, home)
+    assert ui.text(bar.clock) == want and st.bar_titled == 1 and len(ui.due('bar_repaint')) == 1
+    sets = len(fw.calls('widget_set_text'))
+    bar_title(fw, bar, home)
+    assert len(fw.calls('widget_set_text')) == sets  # written once, an empty title too
+
+
+def test_home_keeps_the_clock_with_time_in_title_on(fw, st, ui):
+    theme(fw, st)
+    bar = Bar(fw, ui)
+    bar_title(fw, bar, window(ui, 'home_page'))
+    assert ui.text(bar.clock) == '12:00' and st.bar_titled == 0
 
 
 def test_a_dialog_or_no_window_leaves_the_bar(fw, st, ui):
@@ -1055,6 +1076,30 @@ def test_classics_own_title_takes_the_clocks_room_up_to_eq(fw, st, ui):
     ui.set_text(bar.title, '')
     bar_title(fw, bar, 0)
     assert ui.box(bar.title)[2] == 91 and len(ui.due('clock_due')) == 1
+
+
+def test_classics_clock_makes_way_on_home_with_no_wordmark(fw, st, ui):
+    """Show Wordmark off leaves Home's title empty, and off still takes the clock off Home: a pop-up over Home keeps
+    that, and an untitled page gets the clock back."""
+    theme(fw, st, CLASSIC, TIMETITLE=0)
+    bar = Bar(fw, ui, title=True)
+    st.bar_title = bar.title
+    bar_title(fw, bar, window(ui, 'home_page'))
+    assert ui.text(bar.clock) == '' and st.bar_titled == 1
+    dialog = window(ui, 'confirminfo_dialog')
+    ui.types[dialog] = b'dialog'
+    bar_title(fw, bar, dialog)
+    assert st.bar_titled == 1 and not ui.due('clock_due')
+    bar_title(fw, bar, window(ui, 'bare_page'))
+    assert st.bar_titled == 0 and len(ui.due('clock_due')) == 1
+
+
+def test_classics_home_keeps_the_clock_with_time_in_title_on(fw, st, ui):
+    theme(fw, st, CLASSIC)
+    bar = Bar(fw, ui, title=True)
+    st.bar_title = bar.title
+    bar_title(fw, bar, window(ui, 'home_page'))
+    assert ui.text(bar.clock) == '12:00' and st.bar_titled == 0
 
 
 # The theme's faces (theme_font, theme_face): its own face where it has the text's characters, else bold.ttf,

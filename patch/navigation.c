@@ -200,7 +200,6 @@ extern void coverflow_home_clip(void *w, void *canvas, int begin);
 extern void coverflow_slant(void *w, void *canvas, unsigned paper), coverflow_slant_close(void);
 extern int coverflow_home_back(void *top), coverflow_home_owns(void *w);
 extern void coverflow_home_top(void);
-extern const char *coverflow_home_title(void);
 extern void coverflow_home_row(void *surface, void *row, int id, int painting);
 extern void lockscreen_paint(void *w, void *canvas);
 extern void coverflow_paint(void *w, void *canvas), photos_paint(void *w, void *canvas),
@@ -467,7 +466,7 @@ static int is_home(void *top, void *w) { return w && kind(w) == 3 && carousel_pa
 
 /* iPod Home's lists (the main menu and its Settings list): their ends wrap at once, and Return
  * goes back to the first row. */
-static int home_menu(void *top) {
+int home_menu(void *top) {
     return top && !tk_strcmp(widget_get_prop_str(top, "name", ""), "home_page");
 }
 

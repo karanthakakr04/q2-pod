@@ -100,9 +100,10 @@ int np_sync(void *top) {
 }
 
 /* Time in Title off: the bar's centre names the page in front, as an iPod's, in Modern's bold:
- * Now Playing or Cover Flow, else stock's title in the page's hidden navbar (scrlabel_title, or a
- * settings page's unnamed first child). Home, a page showing its navbar and an untitled page keep
- * the clock; a pop-up or keyboard leaves the bar as it is. This runs in a paint, which drops the
+ * Now Playing or Cover Flow, Home by coverflow_home_title (Q2 Pod; nothing with Show Wordmark off,
+ * and no clock either way), else stock's title in the page's hidden navbar (scrlabel_title, or a
+ * settings page's unnamed first child). A page showing its navbar and an untitled page keep the
+ * clock; a pop-up or keyboard leaves the bar as it is. This runs in a paint, which drops the
  * label's invalidate, so bar_repaint follows; the clock waits for its timer. */
 void bar_title(void *bar, void *top) {
     static const unsigned
@@ -110,7 +111,9 @@ void bar_title(void *bar, void *top) {
         cover_flow[] = { 'C', 'o', 'v', 'e', 'r', ' ', 'F', 'l', 'o', 'w', 0 }, none = 0;
     if (st.bar_title) { /* this bar names the page in its own label: off, the clock makes way */
         const unsigned *own = widget_get_text(st.bar_title);
-        int titled = !st.time_title && own && *own;
+        static int home; /* Home in front: no clock under its title though it is empty */
+        if (top && !tk_strcmp(widget_get_type(top), "window")) home = home_menu(top);
+        int titled = !st.time_title && (home || (own && *own));
         void *clock = titled != st.bar_titled ? widget_lookup(bar, "label_clock", 1) : (void *)0;
         if (!clock) return;
         st.bar_titled = titled;
@@ -151,6 +154,14 @@ void bar_title(void *bar, void *top) {
         const unsigned *a = title, *b = null_name; /* stock's "%s" of a NULL name: no title */
         while (a && *a && *a == *b) ++a, ++b;
         if (a && !*a && !*b) title = (void *)0;
+        if (home_menu(top)) {
+            static unsigned name[16];
+            const char *h = coverflow_home_title();
+            unsigned i = 0;
+            for (; h[i] && i < sizeof name / sizeof *name - 1; ++i) name[i] = (unsigned char)h[i];
+            name[i] = 0;
+            title = name;
+        }
     }
     if (!title) {
         if (!st.bar_titled) return;
@@ -164,7 +175,7 @@ void bar_title(void *bar, void *top) {
     }
     const unsigned *had = widget_get_text(label), *want = title;
     while (had && *had && *had == *want) ++had, ++want;
-    int changed = !st.bar_titled || !had || *had != *want;
+    int changed = !st.bar_titled || (had ? *had : 0u) != *want; /* Home's may be empty */
     if (changed) widget_set_text(label, title);
     st.bar_titled = 1;
     int bold =

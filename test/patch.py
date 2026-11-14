@@ -1083,7 +1083,7 @@ def reads(): return [c for c in s.calls if c[0] in ('time@GLIBC_2.0','localtime_
 def minute(ms=1000): s.advance(ms)
 s.advance(0); assert clock()=='6:14 PM'; passed()  # the gradient check's paint above started it
 # Time in Title off: the bar names the page in front (Now Playing, or stock's title in its hidden
-# navbar, a settings page's unnamed first child); a pop-up leaves it; Home, a shown navbar or no title is the clock.
+# navbar, a settings page's unnamed first child); a pop-up leaves it; a shown navbar or no title is the clock.
 def title_machine(**config):
     CONFIG.update(config); t=Machine(); CONFIG.clear(); t.clock_minutes=True
     label=t.node('hscroll_label','label_clock'); bar=t.node('system_bar','system_bar',[label])
@@ -1096,14 +1096,20 @@ def title_machine(**config):
         kids=[t.node('hscroll_label',name,text=title)] if title is not None else []
         w=t.node('window','some_page',[t.node('view','view_navbar',kids,visible=shown)]); t.word(w+O['W_PARENT'],t.wm); return w
     return t,label,show,page
-t,label,show,page=title_machine(TIMETITLE='0'); time=show(t.node('window','home_page'))
+t,label,show,page=title_machine(TIMETITLE='0'); time=show(page(None))
 assert time=='6:14 PM' and show(page('Albums'))=='Albums' and t.nodes[label].get('style:normal:font_name','default')=='default'
 assert show(page('Display',name=''))=='Display' and show(t.node('dialog','volume_dialog'))=='Display' and show(t.node('keyboard','kb_default'))=='Display'
 assert show(t.node('window','coverflow_page'))=='Cover Flow'
 assert show(page('Bootvol',shown=1))==time and show(page('Empty'))=='Empty' and show(page(''))==time and show(page(None))==time; passed()
 show(page('Albums')); assert t.wrote; show(t.top); assert not t.wrote; passed()  # only a new title is written
 t.clock=(6,15); t.advance(61000); assert t.nodes[label]['text']=='Albums'  # the clock's minute leaves a title alone
-assert show(t.node('window','home_page'))!=time; passed()
+assert show(page(None))=='6:15 AM'; passed()
+# ... and Home is named as Classic's bar names it, Q2 Pod, or nothing with Show Wordmark off: no clock either way.
+assert show(t.node('window','home_page'))=='Q2 Pod' and show(t.node('dialog','volume_dialog'))=='Q2 Pod' and show(page(None))=='6:15 AM'
+t,label,show,page=title_machine(TIMETITLE='0',SHOWQ2POD='0'); home=t.node('window','home_page')
+assert show(page('Albums'))=='Albums' and show(home)=='' and t.wrote; show(home); assert not t.wrote and t.nodes[label]['text']==''
+t.clock=(6,15); t.advance(61000); assert t.nodes[label]['text']=='' and show(page(None))=='6:15 AM'
+t,label,show,page=title_machine(SHOWQ2POD='0'); assert show(t.node('window','home_page'))=='6:14 PM'; passed()  # on, Home's clock
 t,label,show,page=title_machine(TIMETITLE='0',THEME='2'); assert show(page('Albums'))=='Albums' and t.nodes[label]['style:normal:font_name']=='bold'
 assert show(page(None))=='6:14 PM' and t.nodes[label]['style:normal:font_name']=='default'; passed()
 t,label,show,page=title_machine(); assert show(page('Albums'))=='6:14 PM'; passed()  # the clock unless chosen
@@ -13186,6 +13192,15 @@ for status in (0,2,0):
     for _ in range(2): hm.call(address=HOOKS['widget_on_paint_background'][0],args=(hbar,hm.canvas,0,0),gap=0); hm.advance(1)
     assert (hm.nodes[htt].get('text'),hm.nodes[htt].get('visible',1),hm.nodes[hcl].get('text'))==('Q2 Pod',1,''),status
 passed()
+# ... and with Show Wordmark off too, its title empty: no clock on Home, nor under a pop-up over it; an untitled page has it.
+hm=Machine(); hm.config['TIMETITLE']='0'; hm.config['SHOWQ2POD']='0'; classic_light_on(hm); hm.clock_minutes=True
+htt,hcl=hm.node('hscroll_label','label_title'),hm.node('hscroll_label','label_clock'); hbar=classic_light_bar(hm,htt,hcl)
+def hshow(win):
+    hm.top=win; hm.word(win+O['W_PARENT'],hm.wm)
+    for _ in range(2): hm.call(address=HOOKS['widget_on_paint_background'][0],args=(hbar,hm.canvas,0,0),gap=0); hm.advance(1)
+    return hm.nodes[htt].get('text',''),hm.nodes[hcl].get('text')
+assert hshow(hm.node('window','bare_page'))==('','6:14') and hshow(hm.node('window','home_page'))==('','')
+assert hshow(hm.node('dialog','confirminfo_dialog'))==('','') and hshow(hm.node('window','bare_page'))==('','6:14'); passed()
 # Off, the title takes the clock's room up to EQ's box (view_right's x plus its own, 222), and its own width back on a page
 # with no title; on, it keeps its own.
 for wtt,wwide in (('0',222-54),('1',98)):

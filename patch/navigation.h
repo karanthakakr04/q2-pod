@@ -454,6 +454,8 @@ int remain_due(const void *info);
 int np_fit_due(const void *info);
 int np_sync(void *top);
 void bar_title(void *bar, void *top);
+int home_menu(void *top);               /* Home's page in front (navigation.c) */
+const char *coverflow_home_title(void); /* Home's title (coverflow.c) */
 void slider_fill(void *slider, unsigned color);
 void slider_knobless(void *slider);
 void np_theme(void);

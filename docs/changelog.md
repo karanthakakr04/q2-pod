@@ -4,6 +4,7 @@
   - Appearance: **Hide Streaming on Home** and **Hide Folder on Home** are now called **Hide Streaming** and **Hide Folder**. The first was too long for its row and was cut off. They do what they did, and stay on or off as you had them.
   - Appearance: **Show Q2 Pod** is now called **Show Wordmark**: it shows or hides the name Q2 Pod in Home's title bar, where an iPod reads iPod. It stays on or off as you had it.
   - System Update: **Remind Daily** is now called **Update Notifications**. It does what it did, and stays on or off as you had it.
+  - Appearance: **Time in Title: Off** now takes the clock off Home too. Home's title bar reads **Q2 Pod** in every theme, or stays empty with **Show Wordmark** off. Home kept the clock in Minimal and Modern, and in Classic with Show Wordmark off.
   - Settings: row labels that were cut off now show whole, as their rows give the text more room. In Classic: **Click With Headphones**, Bluetooth's **Control Device Volume**, **Battery: Percent Inside** and **Shortcut: Rated Albums**. In Minimal and Modern: **Wheel Sensitivity** at 100% or more and **Resume Songs** at 100 minutes or more.
   - Cover Flow: **Display → Cover Flow**'s **Cover Flow Sort** row is now called **Sort**, as the page it's on is Cover Flow's. Your order is kept.
   - Scrobbling: a song, artist or album named exactly "error" no longer stops **Upload Scrobbles** to Last.fm. Last.fm's reply repeats each name, and the Q2 took the word for a refusal, so that listen and every one after it stayed on the card. They go with the next upload.
