@@ -29,8 +29,10 @@ defaults:
 jobs:
   mutmut:
     runs-on: ubuntu-24.04
-    # From scratch took 75 minutes on four desktop workers (docs/building.md#mutation-tests); a runner is slower.
-    timeout-minutes: 240
+    # From scratch took 75 minutes on four desktop workers (docs/building.md#mutation-tests); a runner is slower:
+    # one tested 16,519 of 20,043 mutants in the 4 hours it had, so all of them take about 4 h 50 min.
+    # ponytail: one runner; split the mutants over a matrix before a run nears GitHub's 6 hours.
+    timeout-minutes: 330
     env:
       BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || '' }}
     steps:
