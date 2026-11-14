@@ -1508,10 +1508,11 @@ def test_light_modes_chevron_on_a_coloured_bar_is_white(fw, st, layout, light):
     if not light:
         assert not canvas.icons and not canvas.boxes
         return
-    # the glyph's middle half cleared in the bar's tone, then the white glyph, on the image's middle
+    # the glyph's middle half each way cleared in the bar's tone (a row's text runs under the image's left columns),
+    # then the white glyph, on the image's middle
     (box, color, _), = canvas.boxes
     mx, my = middle(box)
-    assert box[2:] == (art[0], art[1] // 2) and mx == MIDDLE[0] and abs(my - MIDDLE[1]) <= 1
+    assert box[2:] == (art[0] // 2, art[1] // 2) and abs(mx - MIDDLE[0]) <= 1 and abs(my - MIDDLE[1]) <= 1
     tone = Scheme(fw, layout).tones[0]
     assert not neutral(tone) and color == rgba(tone)  # a coloured bar's own tone
     assert canvas.icons == [(art, MIDDLE[0] // 2, MIDDLE[1] // 2)]

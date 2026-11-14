@@ -12426,7 +12426,7 @@ for into_half in ('1','0'):  # Classic, both halves: the chevron alone, its box 
 into_m,into_icons,into_fills=into_paint('1','1',row=1); assert not into_icons and not into_fills,(into_icons,into_fills)  # the row under no band
 into_m,into_icons,into_fills=into_paint('0','1')  # Minimal Light: the middle half cleared in the accent, then the white `>`
 assert into_icons==[(25,24)] and [c[0] for c in into_fills]==['canvas_fill_rounded_rect']+into_restore
-assert [(r['kind'],r['rect'],r['color']) for r in into_m.rounded]==[('fill',(0,12,50,25),color_t(ACCENTS[1][0]))],into_m.rounded
+assert [(r['kind'],r['rect'],r['color']) for r in into_m.rounded]==[('fill',(13,12,25,25),color_t(ACCENTS[1][0]))],into_m.rounded
 into_m,into_icons,into_fills=into_paint('0','0'); assert not into_icons and not into_fills; passed()  # Minimal dark: stock's own
 # Classic's Appearance: Theme, then its own options in order (Light Mode, Accent, Home, Shortcut, Battery, Time in
 # Title, Library on Home, Row Preview, Row Art; Corners and Centred NP are not declared). Each is a title with its value right-aligned; no switch
@@ -18638,7 +18638,7 @@ m.row(2); assert m.toasts[-1][3]=='Stopped checking for updates'; shelf_job(m); 
 m.close(); m.rockbox_mode=0; m.dirs.pop('/mnt/mmc/.spotify'); m.reply=(ROOT/'test/shelf/q2-rockbox.json').read_bytes()
 toasts=len(m.toasts); apps_open(m); shelf_job(m); assert len(m.toasts)==toasts  # the opening check: nothing to update, nothing said
 assert m.labels()==['App Store','Check for Updates',BLANK,'Rockbox','Install','Spotify','Install','Deezer','Install','Soulseek','Install','File Browser','Install','Subsonic','Install','Podcasts','Install','Live Music Archive','Install','Buddy','Install','Groovebox','Install','AirPlay','Install']  # not stopped: checked again
-m.row(1); assert m.labels()[4]=='Starts at power-on; Boot to changes that. Press again to install' and len(m.threads)==6
+m.row(1); assert m.labels()[4]=='Starts at power-on; see Boot to. Press again' and len(m.threads)==6
 m.row(1); assert len(m.threads)==7 and m.labels()[4]=='Checking…'; m.row(1); shelf_job(m); assert m.toasts[-1][3]=='Download cancelled'
 m.free=10<<20; m.row(1); m.row(1); shelf_job(m)  # the zip (13018581 bytes) and 64 MB left over
 assert m.toasts[-1][3]==f'Needs {(13018581+(54<<20)+(1<<20)-1)>>20} MB more space' and not [f for f in m.files if '.q2/staging/' in f]; passed()
@@ -21261,7 +21261,7 @@ def conf_open(m):
     m.click(m.nodes[m.nodes[view]['children'][5]]['children'][0]); m.page=m.top
 m=ShelfMachine({SCAP:bytearray(b'4096M')}); conf_open(m)
 assert m.labels()[2:5]==['Spotify Cache: 4 GB','Erase Spotify Data','Stop Streaming Services']
-m.row(2); assert m.labels()[3]=='Press again to erase the login and cache' and not m.threads
+m.row(2); assert m.labels()[3]=='Press again to erase login and cache' and not m.threads
 m.row(0); assert m.labels()[3]=='Erase Spotify Data'  # another row's press drops it
 m.row(2); m.destroy(m.page); conf_open(m); assert m.labels()[3]=='Erase Spotify Data'  # so does leaving
 m.row(2); m.row(2); assert m.labels()[3]=='Erasing…' and len(m.threads)==1 and KILL in m.systems[-1]

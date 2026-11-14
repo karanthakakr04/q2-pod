@@ -2668,10 +2668,12 @@ static void paint_into(void *w, void *canvas) {
         (sel_only && !tk_strcmp(widget_get_prop_str(window_of(w), "name", ""), "folder_page")) ||
         widget_load_image(w, box ? "classic_light_chevron" : LIST_INTO_WHITE, bitmap))
         return;
-    /* Only the middle half is cleared, where the glyph's ink is (rows 16-33 of 50): the whole
-     * 50 px image would cross a 48 px row's top, over the bar's highlight and the row above. */
+    /* Only the middle half is cleared, each way, where the glyph's ink is (columns 20-30, rows
+     * 16-33 of 50): the whole 50 px image would cross a 48 px row's top, over the bar's highlight
+     * and the row above, and its left columns the end of a settings row's text, which runs to
+     * 8 px inside the image (list_row_into). */
     int x = box ? box + (int)bitmap[0] / 2 - I(canvas, CANVAS_X) : I(w, W_W) / 2, y = I(w, W_H) / 2;
-    rect_t clear = { x - (int)bitmap[0] / 2, y - (int)bitmap[1] / 4, (int)bitmap[0],
+    rect_t clear = { x - (int)bitmap[0] / 4, y - (int)bitmap[1] / 4, (int)bitmap[0] / 2,
                      (int)bitmap[1] / 2 };
     unsigned fill = (unsigned)I(P(canvas, CANVAS_LCD), LCD_FILL_COLOR);
     if (!sel_only) fill_box(canvas, &clear, RGBA(tones()[0]), 0);
@@ -2825,7 +2827,7 @@ void *list_row(void *view, const char *icon, int (*click)(void *, void *), void 
 
 /* A settings row that opens a page, its label clear of the chevron. */
 static void *list_row_into(void *view, const char *icon, int (*click)(void *, void *), void *ctx) {
-    return list_row_core(view, icon, click, ctx, 220, 1); /* laid out, 12 px before its ink */
+    return list_row_core(view, icon, click, ctx, 220, 1); /* laid out, to 10 px before its ink */
 }
 
 static void value_row(void *label, const char *title, const char *value, int w);
@@ -4231,10 +4233,10 @@ static void paint_battery(void *w, void *canvas) {
         st.pct_digit = (int)(canvas_measure_text(canvas, &c, 1) + 0.5f);
         c = '%';
         st.pct_sign = (int)(canvas_measure_text(canvas, &c, 1) + 0.5f);
-    }
-    if (st.batt_mode == 1) {
         /* bar_sync fitted the mode to BATT_PCT_W: again, with these */
         if (!st.bar_timer) st.bar_timer = timer_add(bar_repaint, (void *)0, 0);
+    }
+    if (st.batt_mode == 1) {
         rect_t r = { 0, 0, I(w, W_W), I(w, W_H) };
         draw_centred(canvas, s, n, &r, px, color);
         return;
@@ -8612,7 +8614,7 @@ static void sc_text(int i) {
     widget_set_text_utf8(widget_get_child(st.sc_row[i], 0),
                          i < 2            ? s
                          : shelf_erase(0) ? "Erasing…"
-                         : st.sc_armed    ? "Press again to erase the login and cache"
+                         : st.sc_armed    ? "Press again to erase login and cache"
                                           : "Erase Spotify Data");
 }
 

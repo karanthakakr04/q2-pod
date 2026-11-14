@@ -1377,7 +1377,7 @@ def test_a_press_without_wifi_says_so(fw):
 def test_rockbox_asks_twice_as_it_becomes_the_default(fw):
     p = Page(fw, b'x/q2-rockbox')
     p.click()
-    assert p.sh.job == 0 and p.label(1).endswith('Press again to install')
+    assert p.sh.job == 0 and p.label(1).endswith('see Boot to. Press again')
     p.click()
     assert p.sh.job == JOB_INSTALL
 
@@ -2615,7 +2615,7 @@ def test_rockbox_installs_on_a_second_press_keeping_its_config(fw):
     s.wifi = 1
     s.click()
     label, = s.labels()
-    assert label.endswith('Press again to install') and not s.workers
+    assert label.endswith('see Boot to. Press again') and not s.workers
     s.click()
     assert s.run() == 0 and s.toasts == ['Rockbox is ready. Find it on Home'] and s.labels() == ['Installed']
     assert card.files[b'/mnt/mmc/.rockbox/config.cfg'] == b'mine' and card.files[b'/mnt/mmc/.rockbox/rockbox'] == b'bin'

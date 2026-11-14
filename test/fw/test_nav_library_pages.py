@@ -1883,7 +1883,7 @@ def test_erase_wants_a_second_press(fw, ui):
     erasing(fw)
     page, *_ = configuration(fw, ui)
     ui.click(page, 2)
-    assert ui.captions(page)[2] == 'Press again to erase the login and cache' and not fw.calls('fw_system')
+    assert ui.captions(page)[2] == 'Press again to erase login and cache' and not fw.calls('fw_system')
     ui.click(page, 2)
     assert ui.captions(page)[2] == 'Erasing…' and fw.calls('fw_system')  # librespot stopped first
 
@@ -1894,7 +1894,7 @@ def test_another_row_drops_the_first_press(fw, ui):
     ui.click(page, 0)
     assert ui.captions(page)[2] == 'Erase Spotify Data'
     ui.click(page, 2)
-    assert ui.captions(page)[2] == 'Press again to erase the login and cache'
+    assert ui.captions(page)[2] == 'Press again to erase login and cache'
 
 
 def test_leaving_drops_the_first_press(fw, ui, st):
@@ -1921,7 +1921,7 @@ def test_an_erase_s_end_shows_on_the_page(fw, ui):
     ui.click(page, 2)
     del disk.files[f'{SPOT_DIR}/.cache-size']  # netupdate.c's erase took it, and calls back
     fw.fn('stream_erased', None)()
-    assert ui.captions(page)[1:3] == ['Spotify Cache: 2 GB', 'Press again to erase the login and cache']
+    assert ui.captions(page)[1:3] == ['Spotify Cache: 2 GB', 'Press again to erase login and cache']
 
 
 def test_an_erase_s_end_with_the_page_gone_writes_nothing(fw, ui):
