@@ -3174,7 +3174,8 @@ static int *const pod_values[] = { &st.charge_limit,
                                    &st.cf_position,
                                    &st.hide_stream,
                                    &st.hide_folder,
-                                   &st.remind_daily };
+                                   &st.remind_daily,
+                                   0 };
 _Static_assert(POD_LOCKCLOCK == 6, "lockscreen.c passes pod_rows 6");
 _Static_assert(POD_REMIND_DAILY == 26, "netupdate.c passes pod_rows 26");
 _Static_assert(sizeof pod_values / sizeof *pod_values == POD_COUNT, "a pod_values per row");
@@ -3204,7 +3205,8 @@ static const char *const pod_keys[] = { "CHARGELIMIT",
                                         "CFPOSITION",
                                         "HIDESTREAM",
                                         "HIDEFOLDER",
-                                        "REMINDDAILY" };
+                                        "REMINDDAILY",
+                                        0 };
 _Static_assert(sizeof pod_keys / sizeof *pod_keys == POD_COUNT, "a pod_keys entry per row");
 /* a row's choices: Artist albums three, Standby limit four, every other row two */
 static int pod_choices(unsigned i) { return i == POD_ARTIST_CF ? 3 : i == POD_STANDBY ? 4 : 2; }
@@ -3326,6 +3328,7 @@ static void pod_text(int i) {
         { 0 }, /* Hide Streaming: a switch */
         { 0 }, /* Hide Folder: a switch */
         { "Update Notifications: Off", "Update Notifications: On" },
+        { "Album View: List", "Album View: Grid" },
     };
     _Static_assert(sizeof names / sizeof *names == POD_COUNT, "a names entry per row");
     if (i == POD_CF_SORT) { /* the Sort card's words, as Cover Flow's page holds the row */
@@ -3333,6 +3336,7 @@ static void pod_text(int i) {
         return;
     }
     int v = i == POD_ARTISTS       ? I(artist_type, 0) == 1
+            : i == POD_ALBUM_GRID  ? I(album_modetype, 0) == 1
             : i == POD_KEYTONE     ? g_keytone_flag != 0
             : i == POD_CARMODE     ? g_carmode != 0
             : i == POD_COVERMODE   ? g_bigcovermode == 1
@@ -3366,10 +3370,10 @@ static void pod_text(int i) {
 }
 /* Centre or tap toggles and saves. Charge limit takes effect on the next UI loop pass
  * (power_poll), Smart Wi-Fi within SMART_POLL_MS; Artists on the next load of an artist list, as
- * the artist page's switch does; Fast Navigation's letters at the next spin, its half copies at
- * Cover Flow's next idle pass; Standby limit at the next Standby; Sort and Refresh
- * Coverflow at Coverflow's next open (coverflow.c), Refresh with a toast, as it changes nothing in
- * view. */
+ * the artist page's switch does; Album View at Albums' next open, or at once on one that is open;
+ * Fast Navigation's letters at the next spin, its half copies at Cover Flow's next idle pass;
+ * Standby limit at the next Standby; Sort and Refresh Coverflow at Coverflow's next open
+ * (coverflow.c), Refresh with a toast, as it changes nothing in view. */
 static int pod_click(void *ctx, void *event) {
     int i = (int)(long)ctx;
     pod_settings();
@@ -3382,6 +3386,8 @@ static int pod_click(void *ctx, void *event) {
         int v = I(artist_type, 0) != 1;
         I(artist_type, 0) = v;
         write_int_config(v, "PLAYSET", "ARTISTTYPE");
+    } else if (i == POD_ALBUM_GRID) {
+        album_view_toggle();
     } else if (i == POD_KEYTONE) {
         g_keytone_flag = !g_keytone_flag;
         write_int_config(g_keytone_flag, "SYSSET", "KEYTONE");
@@ -3500,8 +3506,8 @@ static const unsigned char playset_order[] = {
 };
 /* Library & Folders: stock's Folder skip (0), then ours as built. */
 static const unsigned char library_order[] = {
-    2 /* Artists */,     3 /* Artist album order */, 1 /* Year order */,
-    4 /* Folder Root */, 0 /* Folder skip */,        5 /* Folder art */,
+    2 /* Artists */,     6 /* Album View */,  3 /* Artist album order */, 1 /* Year order */,
+    4 /* Folder Root */, 0 /* Folder skip */, 5 /* Folder art */,
 };
 /* Connections, personalisation and daily controls, then device maintenance; About stays last.
  * Stock's Wheel Function, In-Vehicle, General and System stay hidden, its page left whole: the
@@ -3615,6 +3621,7 @@ int ringnav_audioset(void *win, void *ctx) {
         st.root_label = list_row(view, "playset_folderjump", root_click, 0);
         root_text(name);
         pod_rows(win, "scroll_view_playset", POD_FOLDERCOVER, 1, cover_icons + 1);
+        pod_rows(win, "scroll_view_playset", POD_ALBUM_GRID, 1, icons); /* under Artists */
         reorder(view, library_order, sizeof library_order);
         return result;
     }

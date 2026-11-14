@@ -52,6 +52,8 @@ enum {
     POD_HIDE_FOLDER,
     POD_REMIND_DAILY, /* System Update's Update Notifications (netupdate_poll); netupdate.c passes
                          pod_rows 26 */
+    POD_ALBUM_GRID,   /* Library & Folders' Album View: stock's value and PLAYSET key
+                         (album_view_toggle) */
     POD_COUNT
 };
 
@@ -550,6 +552,7 @@ int stock_usb_config_trampoline(void), stock_usb_detect_trampoline(void);
 int stock_usb_status_trampoline(void);
 
 /* library_lists.c */
+void album_view_toggle(void);
 int era_menu(void *ctx, void *event);
 int era_sql(const char *sql, int (*row)(void *, int, char **, char **), void *ctx);
 int long_songs(void *ctx, void *event);

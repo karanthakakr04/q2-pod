@@ -1934,16 +1934,17 @@ def test_library_and_folders_is_stocks_page_again_with_the_library_rows(fw, st):
     opener = row(ui, view, 'Library & Folders')
     click(ui, opener)
     assert sub['name'] == b'playset/playset_page' and sub['title'] == ui.text(label_of(opener))  # titled as its row
-    ours = sub['rows'][:4]
-    skip, art = sub['rows'][4:]
+    ours = sub['rows'][:5]
+    skip, art = sub['rows'][5:]
     # stock's Folder skip, then Folder Album Cover (a row of stock's Volume and Album Display), last
     assert skip.name == 's12' and icon(art) == 'playset_foldercover' and ui.text(label_of(art)) == 'Folder Album Cover'
     assert C.string_at(fw.calls('widget_set_tr_text')[-1][1][1]) == b'playset_foldercover'  # stock's row, stock's translation
     was = g(fw, 'g_foldercover_flag')
     for r in ours + [art]:
         click(ui, r)
-    # the library's rows, by the setting each saves: Artists, Artist album order, Year order, Folder Root, Folder Album Cover
-    assert [key for key, _ in settings.written] == ['ARTISTTYPE', 'ARTISTAZ', 'YEAROLD', 'FOLDERROOT', 'FOLDERCOVER']
+    # the library's rows, by the setting each saves: Artists, Album View under it, Artist album order, Year order, Folder
+    # Root, Folder Album Cover
+    assert [key for key, _ in settings.written] == ['ARTISTTYPE', 'ALBUMTYPE', 'ARTISTAZ', 'YEAROLD', 'FOLDERROOT', 'FOLDERCOVER']
     assert g(fw, 'g_foldercover_flag') == (not was) and switch(art) == ('switch_off' if was else 'switch_on')
     again = ui.add('scroll_view', ui.window('playset_page'), (0, 26, 375, 294), 'scroll_view_playset')
     playset(fw, ui, again)
@@ -1960,6 +1961,45 @@ def test_artists_toggles_stocks_artist_type(fw):
     click(ui, artists)
     assert fw.var('fw_ctx_artist_type', C.c_int).value == 0 and ui.text(label_of(artists)) == 'Artists: Artist'
     assert settings.written == [('ARTISTTYPE', 0)]
+
+
+POD_ALBUM_GRID = 27  # navigation.h
+
+
+def album_view(fw, grid):
+    """Library & Folders' Album View row alone, stock's Albums mode at grid."""
+    ui, win, view, settings, _ = settings_page(fw, MINIMAL, 'playset_page', 'scroll_view_playset')
+    mode = fw.var('fw_ctx_album_modetype', C.c_int)
+    mode.value = grid
+    fw.fn('pod_rows', None, C.c_void_p, C.c_char_p, C.c_int, C.c_int, C.c_void_p)(win.addr, b'scroll_view_playset', POD_ALBUM_GRID, 1, (C.c_char_p * 1)(b'x'))
+    return ui, view.children[0], settings, mode
+
+
+@pytest.mark.parametrize('grid', [0, 1])
+def test_album_view_reads_and_flips_stocks_albums_mode(fw, grid):
+    """Albums' list or grid is stock's album_modetype and PLAYSET ALBUMTYPE; its switch is on the toolbar the themes hide."""
+    ui, row_, settings, mode = album_view(fw, grid)
+    words = ['List', 'Grid']
+    assert ui.text(label_of(row_)) == f'Album View: {words[grid]}'
+    click(ui, row_)
+    assert mode.value == 1 - grid and ui.text(label_of(row_)) == f'Album View: {words[1 - grid]}'
+    assert settings.written == [('ALBUMTYPE', 1 - grid)] and not fw.calls('album_covermode')  # no Albums page open: none to rebuild
+
+
+@pytest.mark.parametrize('acts', [1, 0])
+def test_album_view_runs_stocks_switch_on_an_open_albums_page(fw, acts):
+    """Quick Settings opens the settings over Albums. Stock's own click then flips the mode, saves it and rebuilds that page's
+    table; where it does nothing (no switch in the toolbar: its batch-select state) the row still flips and saves."""
+    ui, row_, settings, mode = album_view(fw, 0)
+    albums = ui.window('album_page', top=False)
+
+    def switch(win, event, *_):
+        mode.value ^= acts
+        return 0
+    fw.mock('album_covermode', switch)
+    click(ui, row_)
+    assert [a[0] for _, a in fw.calls('album_covermode')] == [albums.addr] and mode.value == 1
+    assert ui.text(label_of(row_)) == 'Album View: Grid' and settings.written == ([] if acts else [('ALBUMTYPE', 1)])
 
 
 def pod_rows(fw, win, view_name, first, n):

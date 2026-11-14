@@ -1433,6 +1433,7 @@ FUNCTIONS = {
  'folder_reset_variable': ('int', 'void'),  # a fresh visit: layer 0, no path, enter history or CUE
  'folder_reinit_navbarname': ('int', 'void'),
  'folder_refresh': ('int', 'void *'),
+ 'album_covermode': ('int', 'void *, void *'),  # album_page's list/grid switch's click (library_lists.c album_view_toggle)
  # Videos (books.c): stop the music, the DAC's power, and the screen and standby timeouts held off
  'mclGetOutputWay': ('int', 'void'),
  'mclGetLyricSize': ('int', 'void'),  # the playing track's lyric lines, 0 without
@@ -1509,6 +1510,9 @@ PRIVATE_FUNCTIONS = {
     "mcl_shuffle_pick": 0x5ba7d0,
     "album_row": 0x506e94,  # getAllAlbum's sqlite3_exec callback: id, album, songer, fileurl to a record
     "folder_refresh": 0x531efc,  # folder_page's navbar and table from p_deque_showlist (its init, back)
+    # album_page's btn_albumswitch click (its window as ctx): flips album_modetype, saves PLAYSET ALBUMTYPE, forgets the
+    # table's kept focus and scroll, rebuilds it at the other row height and clamps the scroll
+    "album_covermode": 0x4a4864,
     "class_icon": 0x4b2268,  # a category row's picture: the head for Artists, a genre icon, else .downpic
     "screensaver_rows": HOOKS['screensaver_rows'][0],  # the Lock screen page's rows and picture grid
     "folder_click": HOOKS['folder_click'][0],  # folder_page's row click (folder_enter, then a file's queue)

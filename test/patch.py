@@ -487,7 +487,7 @@ class Machine:
                     found=lookup(child) if c else (child if self.nodes[child].get('name')==self.text(b) else 0)
                     if found: return found
                 return 0
-            ret=lookup(a) if a else 0
+            ret=lookup(a) if a and (a!=self.wm or a in self.nodes) else 0  # a window manager that is no node has no windows to find (Album View)
         elif name=='scroll_bar_cast': ret=a
         elif name=='scroll_bar_is_mobile': ret=n.get('type')=='scroll_bar_m'
         elif name=='widget_set_opacity': self.byte(a+0x34,b); ret=0
@@ -19422,9 +19422,14 @@ assert click(7)==[(0,'PLAYSET','COVERMODE')] and m.u.mem_read(syms['g_bigcovermo
 # Library & Folders: its row opens stock's page again as the sub-page, stock's Folder skip kept, ours built.
 assert click(4)==[] and m.opened[-1]==('playset/playset_page',None) and m.get(payload_syms['playset_sub'])==0
 m,rows,texts,icons,click=settings_page('audioset','scroll_view_playset',stock_rows=13,sub=1)
-assert len(rows)==5 and icons==['playset_covermode','playset_folderjump','playset_covermode','playset_folderjump','playset_foldercover']
-assert texts()==['Year Order: Newest First','Artists: Artist','Artist Album Order: Year','Folder Root: Card','playset_foldercover']
-assert [(m.entries+rows).index(c) for c in m.nodes[m.settings_view]['children']]==[14,15,13,16,12,17]
+assert len(rows)==6 and icons==['playset_covermode','playset_folderjump','playset_covermode','playset_folderjump','playset_foldercover','playset_covermode']
+assert texts()==['Year Order: Newest First','Artists: Artist','Artist Album Order: Year','Folder Root: Card','playset_foldercover','Album View: List']
+assert [(m.entries+rows).index(c) for c in m.nodes[m.settings_view]['children']]==[14,18,15,13,16,12,17]  # Album View, built last, under Artists
+# Album View: Albums as stock's list or its grid, stock's album_modetype and PLAYSET ALBUMTYPE, whose switch is on the
+# toolbar the themes hide. With no Albums page open the value and the key alone change (an open one takes stock's own
+# click: test/fw test_album_view_runs_stocks_switch_on_an_open_albums_page).
+assert click(5)==[(1,'PLAYSET','ALBUMTYPE')] and m.get(syms['album_modetype'])==1 and texts()[5]=='Album View: Grid'
+assert click(5)==[(0,'PLAYSET','ALBUMTYPE')] and m.get(syms['album_modetype'])==0 and texts()[5]=='Album View: List'
 m.byte(syms['g_foldercover_flag'],0); assert click(4)==[(1,'PLAYSET','FOLDERCOVER')] and m.u.mem_read(syms['g_foldercover_flag'],1)==b'\1' and switch_image(m,rows[4])=='switch_on'
 assert click(4)==[(0,'PLAYSET','FOLDERCOVER')] and switch_image(m,rows[4])=='switch_off'
 assert click(2)==[(1,'Q2POD','ARTISTAZ')] and texts()[2]=='Artist Album Order: A–Z'

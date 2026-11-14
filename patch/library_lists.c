@@ -682,3 +682,19 @@ int long_songs(void *ctx, void *event) {
         ls_show();
     return 0;
 }
+
+/* Library & Folders' Album View (navigation.c pod_click): Albums as stock's list or its grid of
+ * covers. Stock's switch is on Albums' toolbar, which the themes hide, so a grid chosen on stock
+ * firmware had no way back. On an Albums page that is open (under the settings, when Quick
+ * Settings opened them over it) the switch's own click runs: it flips album_modetype, saves
+ * PLAYSET ALBUMTYPE and rebuilds the table at the other row height from its top. It does nothing
+ * without its button (the toolbar's batch-select state), and with no page open there is none to
+ * rebuild: the value and the key alone, which Albums' next open builds from. */
+void album_view_toggle(void) {
+    int was = I(album_modetype, 0);
+    void *page = widget_lookup(window_manager(), "album_page", 0);
+    if (page) album_covermode(page, (void *)0);
+    if (I(album_modetype, 0) != was) return;
+    I(album_modetype, 0) = !was;
+    write_int_config(!was, "PLAYSET", "ALBUMTYPE");
+}
