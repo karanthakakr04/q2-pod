@@ -4,6 +4,12 @@
   - Appearance: **Hide Streaming on Home** and **Hide Folder on Home** are now called **Hide Streaming** and **Hide Folder**. The first was too long for its row and was cut off. They do what they did, and stay on or off as you had them.
   - Appearance: **Show Q2 Pod** is now called **Show Wordmark**: it shows or hides the name Q2 Pod in Home's title bar, where an iPod reads iPod. It stays on or off as you had it.
   - System Update: **Remind Daily** is now called **Update Notifications**. It does what it did, and stays on or off as you had it.
+  - Settings: row labels that were cut off now show whole, as their rows give the text more room. In Classic: **Click With Headphones**, Bluetooth's **Control Device Volume**, **Battery: Percent Inside** and **Shortcut: Rated Albums**. In Minimal and Modern: **Wheel Sensitivity** at 100% or more and **Resume Songs** at 100 minutes or more.
+  - Cover Flow: **Display → Cover Flow**'s **Cover Flow Sort** row is now called **Sort**, as the page it's on is Cover Flow's. Your order is kept.
+  - Scrobbling: a song, artist or album named exactly "error" no longer stops **Upload Scrobbles** to Last.fm. Last.fm's reply repeats each name, and the Q2 took the word for a refusal, so that listen and every one after it stayed on the card. They go with the next upload.
+  - Internet Radio: a very large `.pls` station list opens at once. One with thousands of title lines could hold the screen still while it was read.
+  - Messages name rows as the screen does: **Update Library first** (it read Update Local Music), **Updating Library** on Classic's scan screen, and **Network update** in the notice of a new release.
+  - User guide: it names every row as the Q2 shows it (**Update Library**, **Scan music now**, **Genres**, **Lock Screen**, **Rounded Corners**), and now covers **Max Volume**, which limits how loud the Q2 goes (**Volume Guard** doesn't), **Resume Songs**, **Date & Time**, **Wi-Fi File Transfer**, Tidal Downloads and playing to AirPlay speakers.
 
 - **1.8.3**:
   - Now Playing: on the lyrics page, Centre's scrub now takes the wheel, as on the other pages. The first turn used to scroll the lyrics instead and end the scrub. The lyrics take the wheel back once the scrub ends.

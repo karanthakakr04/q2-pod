@@ -39,7 +39,7 @@ int shuffle_play(void *all) {
 static int shuffle_songs(void *ctx, void *event) {
     int n;
     void *all = staged(songs_unsorted, (void *)1, &n);
-    if (!shuffle_play(all)) toast("Update Local Music first");
+    if (!shuffle_play(all)) toast("Update Library first");
     deque_destroy(all);
     return 0;
 }
@@ -48,7 +48,7 @@ static int shuffle_groups(void *ctx, void *event) {
     int n;
     void *all = staged(songs_unsorted, (void *)1, &n);
     if (!playback_groups(all, (int)(long)ctx))
-        toast(deque_size(all) ? "Too many songs to shuffle" : "Update Local Music first");
+        toast(deque_size(all) ? "Too many songs to shuffle" : "Update Library first");
     deque_destroy(all);
     return 0;
 }

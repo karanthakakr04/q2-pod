@@ -7323,7 +7323,7 @@ int main(void) {
 
     /* An empty library, or one being scanned, shows the message and builds nothing. */
     open_page();
-    assert(!strcmp(title(), "Update Local Music first") && !slide() && queries == 1);
+    assert(!strcmp(title(), "Update Library first") && !slide() && queries == 1);
     /* Every list (message, progress, tracks) comes from list(): iPod rows are transparent, so its
        list_view paints black itself rather than the theme's light card. */
     int lists = 0;
@@ -7333,7 +7333,7 @@ int main(void) {
     album("Cover", "cover.jpg");
     *(volatile int *)SCAN_THREAD = 1;
     open_page();
-    assert(!strcmp(title(), "Update Local Music first") && queries == 1 && !calls);
+    assert(!strcmp(title(), "Update Library first") && queries == 1 && !calls);
     close_page();
     *(volatile int *)SCAN_DONE = 1;
 

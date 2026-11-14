@@ -515,7 +515,7 @@ void slider_scrub(void *w, void *canvas) {
     stock_canvas_set_fill_color(canvas, fill);
 }
 
-/* Classic's message screens, over stock's two windows: Update Local Music's dialog
+/* Classic's message screens, over stock's two windows: Update Library's dialog
  * (full-screen, so it paints its own bar) and USB mode's page. Screen rows; each window's own
  * origin is read when it paints. Only the painter reads these tables. */
 #define MSG_BAR_X 72
@@ -605,7 +605,7 @@ void msg_open(void *win) {
     widget_on(win, EVT_DESTROY, msg_gone, win);
     c = text(win, 16, 0, 343, 24);
     widget_set_name(c, "msg_heading");
-    widget_set_text_utf8(c, scan ? "Updating Local Music" : "Connected");
+    widget_set_text_utf8(c, scan ? "Updating Library" : "Connected");
     slider_label(c, 16, 0, 343, MSG_HEAD_H, MSG_HEAD_PX, "classic-light");
     c = text(win, 16, 0, 343, 20);
     widget_set_name(c, "msg_line");

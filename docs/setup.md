@@ -9,7 +9,7 @@ For a brand new Q2. You need the Q2, its microSD card, a USB-C cable and a compu
 3. Put the card in the Q2 and turn it on.
 4. On the Q2: **System settings → System Update → TF card update**. Leave the card in until the Q2 restarts. Do not unplug it while it updates.
 
-After the restart the Q2 opens on Q2 Pod's Home. Then follow **Start here: play your first song** in the [user guide](https://github.com/DiamondBond/q2-pod/releases/latest/download/Q2-Pod-User-Guide.pdf): plug in headphones, copy your music, then choose **Library → Update Local Music**.
+After the restart the Q2 opens on Q2 Pod's Home. Then follow **Start here: play your first song** in the [user guide](https://github.com/DiamondBond/q2-pod/releases/latest/download/Q2-Pod-User-Guide.pdf): plug in headphones, copy your music, then choose **Library → Update Library**.
 
 ## 2. Optional: Spotify
 

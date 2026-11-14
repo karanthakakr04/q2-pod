@@ -410,7 +410,7 @@ def test_shuffle_songs_with_no_library_says_to_update_it(fw, ui, mcl):
     Library(fw, ui)
     call(fw, 'shuffle_menu')
     ui.click(ui.top(), 0)
-    assert ui.toasts == ['Update Local Music first'] and not ui.played
+    assert ui.toasts == ['Update Library first'] and not ui.played
 
 
 def test_shuffle_songs_plays_the_library_from_a_random_song(fw, ui, mcl, song):
@@ -429,7 +429,7 @@ def test_shuffle_albums_and_folders_with_no_library(fw, ui, mcl, row, folders):
     Library(fw, ui)
     call(fw, 'shuffle_menu')
     ui.click(ui.top(), row)
-    assert ui.toasts == ['Update Local Music first'] and not ui.played
+    assert ui.toasts == ['Update Library first'] and not ui.played
 
 
 @pytest.mark.parametrize('row, folders', [(1, 0), (2, 1)])
@@ -2097,7 +2097,7 @@ def test_home_shows_the_card_s_free_space_in_tenths_of_a_gb(fw, device, bsize, b
     assert home_pane(fw)[2] == tenths
 
 
-LIBRARY_STOCK = ['Update Local Music', 'All Songs', 'Album', 'Artist', 'Genre', 'Hi-Res', 'My Fav', 'Frequent', 'Recent',
+LIBRARY_STOCK = ['Update Library', 'All Songs', 'Album', 'Artist', 'Genre', 'Hi-Res', 'My Fav', 'Frequent', 'Recent',
                  'Recently Added', 'Playlist']
 
 
@@ -2129,14 +2129,14 @@ def test_the_library_s_rows_in_their_order(fw, ui, st, theme, lead):
     # My Fav and Frequent hidden, kept in the page for stock's index: Ratings and Most Played list theirs
     assert page_rows(ui, view) == [(c, c not in ('My Fav', 'Frequent')) for c in lead + [
         'Shuffle', 'Artist', 'Album', 'All Songs', 'Genre', 'Era', 'Playlist', 'Ratings', 'My Fav', 'Recently Added', 'Recent',
-        'Most Played', 'Frequent', 'Hi-Res', 'Long Songs', 'Games', 'Update Local Music']]
+        'Most Played', 'Frequent', 'Hi-Res', 'Long Songs', 'Games', 'Update Library']]
 
 
 def test_the_library_adds_the_card_s_media_folders_and_upload(fw, ui):
     win, view = library(fw, ui, folders=['/mnt/mmc/podcasts', '/mnt/mmc/VIDEOS', '/mnt/mmc/Music'], token=b'x')
     rows = [c for c, _ in page_rows(ui, view)]
     assert rows[rows.index('Long Songs'):] == ['Long Songs', 'Podcasts', 'Videos', 'Games', 'Upload Scrobbles',
-                                               'Update Local Music']
+                                               'Update Library']
 
 
 def test_the_library_s_added_rows_have_no_name_for_stock_s_click(fw, ui):

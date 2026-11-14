@@ -715,7 +715,7 @@ void netupdate_poll(void) {
         if (strncmp(nc.told, nc.tag, sizeof nc.tag)) {
             memcpy(nc.told, nc.tag, sizeof nc.told);
             BLOB_IO(NU_TOLD, nc.told, 1);
-            tk_snprintf(s, sizeof s, "Q2 Pod %s is out: System Update → Network Update", nc.tag);
+            tk_snprintf(s, sizeof s, "Q2 Pod %s is out: System Update → Network update", nc.tag);
             toast(s);
             return;
         }

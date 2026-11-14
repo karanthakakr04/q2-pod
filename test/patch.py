@@ -4993,7 +4993,7 @@ class SpecFolderMachine(Machine):
 for index,x,want,listed in ((0,200,200,['/m/0']),(1,200,0,['/m/1']),(2,81,0,['/m/2']),(1,80,80,[])):
     m=SpecFolderMachine(); assert m.tap(index,x)==(listed,(0x77,want)),(index,x,m.listed,m.seen)
 m=SpecFolderMachine(); assert m.tap(1,200,on_row=False)==([],(0x77,200)); passed()
-# Update Local Music: the stock scanner, nested folders and all, has no song limit: stock's 20,000 went with V1.36, and
+# Update Library: the stock scanner, nested folders and all, has no song limit: stock's 20,000 went with V1.36, and
 # Q2 Pod's own 65,000 with it. Only the folder listing, paths and database insert are mocked.
 SONGS,STOP,LISTING=0xa50524,0xa50528,0xa50118  # toolsGetMusicNum's count, toolsStopUpdateMusic's flag, the listing deque
 class ScanMachine(Machine):
@@ -5017,7 +5017,7 @@ class ScanMachine(Machine):
         elif name=='sprintf': assert self.text(b)=='%s/%s'; u.mem_write(a,f'{self.text(c)}/{self.text(d)}'.encode()+b'\0')
         elif name=='insert':
             self.added.append(f'{self.path}/{self.text(self.get(a+O["REC_NAME"]))}'); self.word(SONGS,self.get(SONGS)+1)
-            if len(self.added)==self.stop_at: self.byte(STOP,1)  # Back on the Update Local Music dialog
+            if len(self.added)==self.stop_at: self.byte(STOP,1)  # Back on the Update Library dialog
         self.returns(ret)
 def scan(songs,tree={'/m':['a']},**kw):
     """(return, songs added, stop flag, count): 1 finished, 0 stopped."""
@@ -8003,17 +8003,17 @@ top=em.get(em.view+O['SCROLL_Y']); assert em.selected(em.view)==7 and top>0; em.
 em.release(); em.pick(8); em.advance(0); cd=em.top; citems=em.nodes[em.view]['children']; assert em.labels()[0]=='Play One Song' and [wbox(em,i)[1::2] for i in citems]==[(32*k,32) for k in range(6)] and wbox(em,named(em,cd,'list_view'))==(40,99,294,192)
 tick=[c for i in citems for c in em.nodes[i]['children'] if em.nodes[c]['type']=='image']; assert [em.nodes[c]['image'] for c in tick]==['select'] and wbox(em,tick[0])==(259,0,24,32); passed()
 # A toast: #2b2b2bee in both halves, 22 px, its box holding its font; 24 rows a further line.
-def toast_cl(light,name='msginfo_dialog',text='Update Local Music first'):
+def toast_cl(light,name='msginfo_dialog',text='Update Library first'):
     m=Machine(); m.config['LIGHT']=light; classic_light_boot(m); d=m.node('dialog',name); m.word(d+O['W_PARENT'],m.wm); place(m,d,0,0,375,320); m.top=d
     label=m.node('hscroll_label','',text=text); place(m,label,10,140,355,24); m.nodes[d]['children']=[label]; parents(m,d); return m,d,label
 for light in '01':
     t,td,label=toast_cl(light); bg(t,td); box_=[r for r in t.rounded if r['kind']=='fill']
-    assert [(r['rect'],r['radius'],r['color']) for r in box_]==[((45,138,284,39),12,0xee2b2b2b)] and t.nodes[td]['style:normal:bg_color']==0 and t.lcd_colors()==LCD_COLORS
+    assert [(r['rect'],r['radius'],r['color']) for r in box_]==[((65,138,244,39),12,0xee2b2b2b)] and t.nodes[td]['style:normal:bg_color']==0 and t.lcd_colors()==LCD_COLORS
     assert wbox(t,label)==(22,145,331,24) and (t.nodes[label]['style:normal:font_name'],t.nodes[label]['style:normal:font_size'])==(CL_FONT,22) and wbox(t,label)[3]>22 and t.nodes[label]['style:normal:text_color']&0xffffffff==color_t(0xffffff if light=='0' else 0)
     t.calls=[]; bg(t,td); assert not [c for c in t.calls if c[0]=='widget_move_resize' or c[0].startswith('widget_set_prop')]
 passed()
 # ... two lines; and a line too long for its label: the box stops at the label's width, its text scrolling inside.
-t,td,label=toast_cl('1'); line2=t.node('hscroll_label','',text='Short'); place(t,line2,10,170,355,24); t.nodes[td]['children'].append(line2); parents(t,td); bg(t,td); assert wbox(t,line2)==(22,169,331,24) and [r['rect'] for r in t.rounded if r['kind']=='fill']==[((45,138,284,63))]
+t,td,label=toast_cl('1'); line2=t.node('hscroll_label','',text='Short'); place(t,line2,10,170,355,24); t.nodes[td]['children'].append(line2); parents(t,td); bg(t,td); assert wbox(t,line2)==(22,169,331,24) and [r['rect'] for r in t.rounded if r['kind']=='fill']==[((65,138,244,63))]
 t,td,label=toast_cl('1',text='x'*40); bg(t,td); assert [r['rect'] for r in t.rounded if r['kind']=='fill']==[(22,138,331,39)] and wbox(t,label)[0::2]==(22,331); passed()
 # ... the paint of any other widget compares no names on the dialogs' account, past the one every theme's confirm_prompt makes.
 k=Machine(); classic_light_boot(k); win=k.node('window','some_page'); k.word(win+O['W_PARENT'],k.wm); v=k.node('view','some_view'); k.nodes[win]['children']=[v]; parents(k,win); k.top=win; bare(k); bg(k,v)
@@ -8048,7 +8048,7 @@ for theme_ in '0':
     tt=Machine(); tt.config['THEME']=theme_; td=tt.node('dialog','msginfo_dialog',[tt.node('hscroll_label','',text='x')]); tt.word(td+O['W_PARENT'],tt.wm); place(tt,td,0,0,375,320); tt.top=td; bg(tt,td); assert not tt.rounded and 'style:normal:bg_color' not in tt.nodes[td]
 passed()
 
-# Classic's message screens: stock's Update Local Music dialog and USB mode, as the loader hands them over.
+# Classic's message screens: stock's Update Library dialog and USB mode, as the loader hands them over.
 class MsgMachine(LoadPlain):
     songs=704
     def __init__(self):
@@ -8100,13 +8100,13 @@ for light in '10':
     assert page_fill(um,26,0x63717b if light=='1' else 0x1c1c1c) and [b[:4] for b in darkrows]==[(0,j,375,1) for j in range(26)] and darkrows[0][4]==color_t(0x1c1c1c) and darkrows[24][4]==color_t(0x1c1c1c) and darkrows[25][4]==color_t(0x333333)
     assert [um.nodes[w]['visible'] for w in (uanim,umsg,uscan)]==[0,0,0] and named(um,uwin,'btn_no')==ubtn and um.nodes[ubtn]['visible']==1
     assert [um.text(c[2]) for c in um.calls if c[0]=='widget_load_image']==['classic_light_orb_note'] and um.image_draws[0][1][:2]==(129,38)
-    assert wbox(um,ubtn)==(127,248,121,34) and wbox(um,uhead)==(16,159,343,32) and um.nodes[uhead]['text']=='Updating Local Music' and wbox(um,uline)==(16,188,343,20)
+    assert wbox(um,ubtn)==(127,248,121,34) and wbox(um,uhead)==(16,159,343,32) and um.nodes[uhead]['text']=='Updating Library' and wbox(um,uline)==(16,188,343,20)
     assert um.nodes[uhead]['style:normal:font_size']==29 and um.nodes[uhead]['style:normal:font_name']=='classic-light' and um.nodes[uline]['style:normal:font_size']==18 and um.nodes[uline]['style:normal:font_name']=='default'
     white=color_t(0 if light=='1' else 0xffffff)  # Light Mode's style hook flips it back
     assert um.nodes[uhead]['style:normal:text_color']&0xffffffff==white and um.nodes[uline]['style:normal:text_color']&0xffffffff==white and um.nodes[uhead]['style:normal:text_align_h']=='center'
     for state in ('normal','pressed','over','disable','focused'):
         assert um.nodes[ubtn][f'style:{state}:bg_color']==0 and um.nodes[ubtn][f'style:{state}:font_size']==23 and um.nodes[ubtn][f'style:{state}:font_name']=='classic-light' and um.nodes[ubtn][f'style:{state}:text_color']&0xffffffff==white
-    assert [(t['text'],t['rect'],t['font'][1]) for t in um.letters]==[('Update Library',(0,0,375,25),21),('Updating Local Music',(16,160,343,32),29),('0 of 704 songs',(16,189,343,20),18)]
+    assert [(t['text'],t['rect'],t['font'][1]) for t in um.letters]==[('Update Library',(0,0,375,25),21),('Updating Library',(16,160,343,32),29),('0 of 704 songs',(16,189,343,20),18)]
     assert [b[:5] for b in um.bands if b[1]<=7 and b[0]>=294 and b[2]==26]==[(294,7,26,13,color_t(0xf5f5f5))]  # the battery, on the screen
     cancel,rest=round_box([b for b in um.bands if 248<=b[1]<283],127,248,121,34,7)
     assert cancel[0]==color_t(0x232c33) and cancel[33]==color_t(0x333c43)
@@ -9290,7 +9290,7 @@ m.open(); assert not m.queried() and len(m.nodes[m.slide]['children'])==3; m.clo
 for writer in WRITERS:
     m.rescan(writer); m.calls=[]; m.open(); assert m.queried()==1; m.close()
     m.calls=[]; m.open(); assert not m.queried(); m.close(); passed()
-# Update Local Music while the dialog's count reads songtable on its own connection: stock's
+# Update Library while the dialog's count reads songtable on its own connection: stock's
 # scanAllMusicFile and toolsInitDatabase run on a real SQLite file. The scan's thread waits for the
 # count, so the drop commits and the scan runs. Back ends the wait and the scan: no drop is tried.
 class ScanLockMachine(UiLoad,CoverflowMachine):
@@ -13845,7 +13845,7 @@ assert m.call(address=HOOKS['localmusic_page_init'][0],args=(m.top,5,0,0),gap=0)
 assert m.calls[0][:3]==('stock_localmusic',m.top,5)
 # Library order: Shuffle; Artist, Album, All Songs, Genre, Era, Playlist, Ratings (in My Fav's place, hidden);
 # Recently Added, Recent, Most Played, Frequent (hidden: Most Played is its list), Hi-Res, Long Songs; iPod's Games;
-# then Update Local Music, last (stock rows by get_localmusic_showinfo index).
+# then Update Library, last (stock rows by get_localmusic_showinfo index).
 kids=m.nodes[view]['children']; row,era,rated,top,long=kids[0],kids[5],kids[7],kids[11],kids[14]
 assert [kids[i] for i in (*range(1,5),6,8,9,10,12,13,16)]==[stock[i] for i in (3,2,1,4,10,6,9,8,7,5,0)] and m.nodes[row]['style']=='s_listitem_black'
 icon,label,into=m.nodes[m.nodes[era]['children'][0]]['children']
@@ -13916,7 +13916,7 @@ nf=TTFont(B/'classic-light.ttf'); nc=nf.getBestCmap(); nh=nf['hhea']
 assert sum(nf['hmtx'][nc[ord(c)]][0] for c in nm.nodes[note]['text'])*16/(nh.ascent-nh.descent)+4<=w; passed()
 m.found=[]; m.plays=[]; m.calls=[]
 assert m.call(address=f0,args=(ctx0,m.event,0,0),gap=0)==0
-assert not called('config_playmode') and not m.plays and m.toasts[-1][0]=='dialog/msginfo_dialog' and m.toasts[-1][3]=='Update Local Music first' and m.top==page; passed()
+assert not called('config_playmode') and not m.plays and m.toasts[-1][0]=='dialog/msginfo_dialog' and m.toasts[-1][3]=='Update Library first' and m.top==page; passed()
 # The other two rows queue and group the whole library, then play from the first shuffled group;
 # the same handler runs with the row's index, and the page stays for another pick.
 m.found=[m.song('T1'),m.song('T2')]; m.toasts=[]
@@ -14764,7 +14764,7 @@ worker,arg=m.threads[0]; m.call(address=worker,args=(arg,0,0,0),gap=0); m.advanc
 assert duration_pairs(m.files[DUR_CACHE],['/p/A'])=={'/p/A':1300} and len(m.files[DUR_CACHE])==8+24 and m.probed==['/p/A']
 assert m.texts()==['Long Songs','A','Artist · 21:40','A','Artist · 11:40']; passed()
 
-# Upload Scrobbles: the second-last row, above Update Local Music, only with an account in the card's .scrobble.ini (a
+# Upload Scrobbles: the second-last row, above Update Library, only with an account in the card's .scrobble.ini (a
 # ListenBrainz token or all four Last.fm keys). Without Wi-Fi it only says so; otherwise scrobble.c's thread
 # starts, a second press finds it running, and a timer reports the result once the thread ends.
 m=ShuffleMachine(); m.config.update(USER='u',PASSWORD='p',API_KEY='k')  # no API_SECRET: no row
@@ -17920,7 +17920,7 @@ card_song(X2); m3u(X1,X2); m.word(O['SCAN_THREAD'],1); m.poll()
 assert not listed() and m.names()==['01 - Scan.flac'] and m.files['/tmp/q2-deezer.playing']==f'{X1}\n'.encode(),m.names()
 m.word(O['SCAN_THREAD'],0); m.poll(); assert m.names()==['01 - Scan.flac','02 - Scan.flac'],m.names()
 m.word(O['SCAN_THREAD'],0); m.word(O['SCAN_DONE'],0); passed()
-# Nor while the scan's dialog (Update Local Music, updatemusic_page; a library request's, updatemusic_dialog, opens
+# Nor while the scan's dialog (Update Library, updatemusic_page; a library request's, updatemusic_dialog, opens
 # without the page) is still open once the scan is done: the first song would open Now Playing over it, so it
 # waits, an armed start too, and plays once the dialog closes.
 for seq,win in ((2850,'updatemusic_page'),(2851,'updatemusic_dialog')):
@@ -18084,7 +18084,7 @@ assert track(1)[0]==1 and m.u.mem_read(syms['isFav_playing'],1)[0]==0
 assert track(0)[0]==1 and m.u.mem_read(syms['isFav_playing'],1)[0]==1
 m.call(address=payload_syms['app_fav_load'],args=(0,0,0,0),gap=0); assert m.u.mem_read(syms['isFav_playing'],1)[0]==0; passed()
 # Library update (addon_library.c library_poll): the app's /tmp/q2-<id>.library, "<seq>" then scan and import lines,
-# runs stock's Update Local Music (its dialog, which stops the player: not while one plays, nor while one is paused
+# runs stock's Update Library (its dialog, which stops the player: not while one plays, nor while one is paused
 # with the screen on), then stock's playlist import (which replaces a same-named playlist) for the listed files
 # alone, once no Library list is open under it; each seq once, its result in .library.done.
 LIB,DONE,EXP='/tmp/q2-deezer.library','/tmp/q2-deezer.library.done','/mnt/mmc/_explaylist_data'
@@ -18468,7 +18468,7 @@ else:
     assert len(m.checks)==checks+1; worker,arg=m.checks[-1]
     assert m.call(address=worker,args=(arg,0,0,0),gap=0,count=5_000_000)==0
     assert m.opts[10002]==f'{RELEASES}/latest' and m.opts[44]==1 and 20011 not in m.opts
-    loop(); assert m.toasts[-1][3]=='Q2 Pod 9.9.9 is out: System Update → Network Update' and len(m.toasts)==toasts+1
+    loop(); assert m.toasts[-1][3]=='Q2 Pod 9.9.9 is out: System Update → Network update' and len(m.toasts)==toasts+1
     assert bytes(m.files[TOLD][:6])==b'9.9.9\0'
     loop(); loop(); assert len(m.toasts)==toasts+1 and len(m.checks)==checks+1  # once; the next check is a day off
 m.files['/proc/mounts']=mounts; passed()

@@ -1,4 +1,4 @@
-"""End to end, from a card's files to what plays: Update Local Music and the folder markers (library_scope.c), the
+"""End to end, from a card's files to what plays: Update Library and the folder markers (library_scope.c), the
 Library's lists (navigation.c, coverflow.c), a pick, the queue's order, Up Next and Play Next (playback.c, upnext.c),
 a restart's resume (navigation.c resume_poll, playback.c's snapshot), the gapless preload (playback.c), Crossfade's
 choice of fade (crossfade.c), an audiobook's chapters (chapters.c) and a book's page (books.c).
@@ -450,7 +450,7 @@ class Q2:
         return 0
 
     def update(self):
-        """Library → Update Local Music: stock's scan thread runs the hooked scan."""
+        """Library → Update Library: stock's scan thread runs the hooked scan."""
         return self.call('scanAllMusicFile', 0, 0)
 
     def dbquery(self, db, sql, row, ctx, *_):
@@ -846,7 +846,7 @@ def album_of(q, path):
     return t['album'], t['album_artist']
 
 
-# Update Local Music, the folder markers and the Library's lists.
+# Update Library, the folder markers and the Library's lists.
 def test_a_marked_folder_stays_out_of_the_songs_and_albums_until_its_marker_goes(q2):
     files, tags = music_card()
     q = q2(files, tags)

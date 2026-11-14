@@ -36,7 +36,7 @@ static int library_write(int (*stock)(void *, void *), void *a, void *b) {
 }
 /* Stock's songtable has only its primary key, so an album's songs (getMusicByAlbum's like, on the
  * UI thread at each album open), a file's row (deleteMusicFromMusicDb, the folder scan's check and
- * refresh) and Recently Added each read the whole table. Update Local Music drops the table, and
+ * refresh) and Recently Added each read the whole table. Update Library drops the table, and
  * its indexes with it, so a scan ends by adding them: on its own thread and stock's shared handle,
  * while the library still reads as scanning. A library no scan has run on since has none and reads
  * as before. A reader on another connection makes the create fail (after the 500 ms the shared
@@ -3000,7 +3000,7 @@ static void load_albums(unsigned t0) {
     if (n <= 0) {
         drop_albums(); /* only a real list is kept */
         cf.screen = COVERS; /* Return goes Home */
-        list("Update Local Music first", 0);
+        list("Update Library first", 0);
         return;
     }
     unsigned count = deque_size(cf.albums);
