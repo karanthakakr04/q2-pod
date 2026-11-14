@@ -326,6 +326,7 @@ typedef struct {
 typedef struct {
     void *w, *at[MAX_ENTRIES];
     int id[MAX_ENTRIES], n, kind, rows, row, height, ctx;
+    int cols; /* a table row's entries: ALBUM_GRID in the album grid, else 1 */
     unsigned scope;
 } menu_t;
 

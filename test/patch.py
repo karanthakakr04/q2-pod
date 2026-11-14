@@ -3267,6 +3267,85 @@ for cls,wraps in ((0xf003,True),(0xff10,False)):
     else:
         assert m.call(gap=O['EDGE_PAUSE_MS'])==11 and m.selected(w)==5,(cls,m.selected(w))
     passed()
+# Library -> Albums as a grid (album_page, album_modetype 1, stock's PLAYSET ALBUMTYPE): stock's table rows hold three
+# album tiles, album row*3+cell of the showlist, and on_load_data (0x4a5658) hides a last row's missing ones. The wheel
+# steps album by album, left to right and on to the next row, which it scrolls in, both ways; Centre opens the tile
+# selected and the card is on it; a tap selects its tile; the album comes back with a recreated page. Pools of four
+# 48 px rows, rebound as they scroll.
+class GridMachine(Machine):
+    def __init__(self,**kw):
+        super().__init__(**kw); self.handlers[syms['deque_size']]='grid:deque_size'
+    def hook(self,u,address,size,unused):
+        if self.handlers.get(address)=='grid:deque_size':
+            assert u.reg_read(REGS[0])==self.showlist; return self.returns(self.albums)
+        return super().hook(u,address,size,unused)
+def album_grid(albums,m=None,grid=1):
+    """Albums' page over albums: four rows of three tiles (one in the list form); returns (machine, surface, rows)."""
+    if m is None:
+        m=GridMachine(); m.showlist=m.alloc(0x20); m.word(syms['p_deque_showlist'],m.showlist); m.word(syms['g_class_type'],0xf003)
+    m.albums=albums; m.word(syms['album_modetype'],grid); cells=O['ALBUM_GRID'] if grid else 1
+    w,rs,_=m.table_page(name='album_page')
+    m.word(w+O['W_PARENT'],m.top); m.word(m.top+O['W_PARENT'],m.wm); m.word(w+O['W_W'],375); m.word(w+O['TABLE_ROWS'],-(-albums//cells))
+    for r in rs:
+        m.word(r+O['W_W'],375); m.nodes[r]['children']=[m.entry(r) for _ in range(cells)]
+        for k,t in enumerate(m.nodes[r]['children'] if grid else ()): m.word(t+O['W_X'],14+118*k); m.word(t+O['W_W'],110)
+    def rebind(a,offset):
+        m.bind(rs,offset)
+        for r in rs:
+            for k,t in enumerate(m.nodes[r]['children']): m.nodes[t]['visible']=int(m.get(r+O['ROW_INDEX'])*cells+k<m.albums)
+    rebind(w,0); m.rebind=rebind
+    return m,w,rs
+def album_tile(m,rs,id,cells=3):  # the pool's tile showing album id
+    return m.nodes[next(r for r in rs if m.get(r+O['ROW_INDEX'])==id//cells)]['children'][id%cells]
+ti=O['TILE_INSET']
+for theme in ('0','1','2'):
+    m,w,rs=album_grid(10); m.config['THEME']=theme; m.paint(w); assert m.selected(w)==0
+    def ticks(key,n): return [(m.call(key),m.selected(w),m.get(w+O['TABLE_TOP']))[1:] for _ in range(n)]
+    assert ticks(O['KEY_NEXT'],4)==[(1,0),(2,0),(3,12),(4,12)]
+    m.paint(w); assert m.rounded[-1]['rect']==(14+118+ti,48-12+ti,110-2*ti,48-2*ti),m.rounded[-1]
+    assert m.confirm()==11 and m.dispatched()[-1][1]==album_tile(m,rs,4)
+    assert ticks(O['KEY_NEXT'],5)==[(5,12),(6,60),(7,60),(8,60),(9,96)]
+    assert m.confirm()==11 and m.dispatched()[-1][1]==album_tile(m,rs,9)
+    assert ticks(O['KEY_PREV'],9)==[(8,84),(7,84),(6,84),(5,36),(4,36),(3,36),(2,0),(1,0),(0,0)]
+    m.click(album_tile(m,rs,2)); assert m.selected(w)==2
+    assert ticks(O['KEY_NEXT'],5)==[(3,12),(4,12),(5,12),(6,60),(7,60)]
+    m,w,rs=album_grid(10,m=m); m.paint(w); assert m.selected(w)==7 and m.get(w+O['TABLE_TOP'])==60,(m.selected(w),m.get(w+O['TABLE_TOP']))
+    passed()
+# Seven albums: the last row's one album ends the list, no empty cell is ever selected, and the ends carry over album to
+# album as Albums' list does.
+m,w,rs=album_grid(7); m.paint(w)
+assert [(m.call(),m.selected(w))[1] for _ in range(6)]==[1,2,3,4,5,6] and m.nodes[album_tile(m,rs,6)]['visible']
+assert m.call(gap=100)==11 and m.selected(w)==6
+assert m.call(gap=O['EDGE_PAUSE_MS'])==11 and m.selected(w)==0 and m.get(w+O['TABLE_TOP'])==0
+assert m.call(O['KEY_PREV'],gap=100)==11 and m.selected(w)==0
+assert m.call(O['KEY_PREV'],gap=O['EDGE_PAUSE_MS'])==11 and m.selected(w)==6 and m.get(w+O['TABLE_TOP'])==48
+passed()
+# The speed ramp and SHORT_LIST_MAX count albums, the grid's entries, as every list counts its rows: 16 albums step one
+# a tick however fast, and a fast run over 60 albums takes the steps Songs' 60 rows take and stops on the last album.
+m,w,rs=album_grid(16); m.paint(w); assert [(m.call(gap=60),m.selected(w))[1] for _ in range(15)]==list(range(1,16)); passed()
+m,w,rs=album_grid(60); m.paint(w); fast=[(m.call(gap=60),m.selected(w))[1] for _ in range(40)]
+sm=Machine(); smw,_,_=sm.table_page(rebind=True); sm.word(smw+O['TABLE_ROWS'],60); sm.paint(smw)
+assert fast==[(sm.call(gap=60),sm.selected(smw))[1] for _ in range(40)] and fast[-1]==59 and m.get(w+O['TABLE_TOP'])==20*48-96,fast
+passed()
+# A rescan that shrinks the list under the page: albums past its end are no longer selectable, and once stock reloads
+# the table the wheel goes on from a shown album.
+m,w,rs=album_grid(10); m.paint(w)
+for _ in range(9): m.call()
+assert m.selected(w)==9
+m.albums=4; m.paint(w); assert m.selected(w)<4
+m.word(w+O['TABLE_ROWS'],2); m.word(w+O['TABLE_TOP'],0); m.rebind(w,0); m.paint(w); m.call()
+assert 0<=m.selected(w)<4 and m.nodes[album_tile(m,rs,m.selected(w))]['visible'],m.selected(w); passed()
+# Albums' list form keeps one entry a row.
+m,w,rs=album_grid(10,grid=0); m.paint(w)
+assert [(m.call(),m.selected(w))[1] for _ in range(4)]==[1,2,3,4] and m.confirm()==11 and m.dispatched()[-1][1]==album_tile(m,rs,4,1)
+passed()
+# Under the page sliding in over it, an album's songs, which take the showlist (12 here), the grid keeps the count it had:
+# its card stays on the album opened, the 21st, past the songs' count.
+m,w,rs=album_grid(30); m.paint(w)
+for _ in range(20): m.call()
+assert m.selected(w)==20
+m.page_list(3,name='albuminfo_page'); m.nodes[m.top]['anim_hint']='htranslate'; m.albums=12; cards=len(m.rounded); m.paint(w,gap=0)
+assert m.selected(w)==20 and len(m.rounded)>cards and m.rounded[-1]['rect'][0]==14+118*2+ti,m.rounded[cards:]; passed()
 # Other settings, dynamic pages and other grids keep hard ends; one-row lists never wrap.
 for name in ('display_page','playerqueue_page'):
     m,w,es=walk(6,5,height=96,extent=288,name=name)

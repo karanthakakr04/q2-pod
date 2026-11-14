@@ -885,6 +885,7 @@ static void select(menu_t *m, int id) {
 int load_rows(menu_t *m, void *w) {
     m->w = w;
     m->n = 0;
+    m->cols = 1;
     m->kind = kind(w);
     m->height = I(w, W_H);
     if (!m->kind || m->height <= 0) return 0;
@@ -902,14 +903,31 @@ int load_rows(menu_t *m, void *w) {
         for (int i = 0; i < m->n; ++i) m->id[i] = i;
     } else {
         if (m->kind == 3) m->rows = (int)n;
+        /* The album grid's ids are its albums, as stock's own (row * ALBUM_GRID + cell), so the
+         * wheel steps tile by tile and Centre opens the tile it shows; the count is the showlist's,
+         * which a reload changes before the table catches up. ponytail: by the page and mode, as
+         * stock builds it; another table of tiles would still take one entry a row. */
+        void *win = m->kind == 2 && I(album_modetype, 0) ? window_of(w) : (void *)0;
+        if (win && !tk_strcmp(widget_get_prop_str(win, "name", ""), "album_page")) {
+            void *list = P(p_deque_showlist, 0);
+            int albums = list ? (int)deque_size(list) : 0;
+            /* Under another page the showlist is that page's (an album's songs, as it slides in
+             * and until its Return reloads the albums): the count this one last had. */
+            if (win != window_manager_get_top_window(window_manager()))
+                albums = widget_get_prop_int(w, COUNT, albums);
+            m->cols = ALBUM_GRID;
+            m->rows = albums / ALBUM_GRID < m->rows ? albums : m->rows * ALBUM_GRID;
+        }
         for (unsigned i = 0; i < n && m->n < MAX_ENTRIES; ++i) {
-            void *r = widget_get_child(w, i), *e = (void *)0;
-            entries_t s = { &e, 0, 1, 256 };
+            void *r = widget_get_child(w, i), *e[ALBUM_GRID];
+            entries_t s = { e, 0, m->cols, 256 };
             collect(r, &s, 0);
             int id = m->kind == 2 ? I(r, ROW_INDEX) : (int)i;
-            if (e && id >= 0 && id < m->rows) {
-                m->at[m->n] = e;
-                m->id[m->n++] = id;
+            if (id < 0 || id > (m->rows - 1) / m->cols) continue;
+            /* A last row's missing albums are hidden, so a row's cells are its first entries. */
+            for (int j = 0; j < s.n && id * m->cols + j < m->rows && m->n < MAX_ENTRIES; ++j) {
+                m->at[m->n] = e[j];
+                m->id[m->n++] = id * m->cols + j;
             }
         }
     }
@@ -1021,7 +1039,7 @@ static int sel_height(menu_t *m) {
 
 /* Largest viewport top that still shows content; the clamp bound for every glide. */
 static int scroll_end(menu_t *m, int height) {
-    if (m->kind == 2) return m->rows * m->row - height;
+    if (m->kind == 2) return (m->rows + m->cols - 1) / m->cols * m->row - height;
     return m->kind == 1 ? I(m->w, VIEW_CONTENT_H) - height : 0;
 }
 static int max_top(menu_t *m) { return scroll_end(m, sel_height(m)); }
@@ -1098,7 +1116,7 @@ void reveal(menu_t *m, int id, int immediate) {
     int top = view_top(m);
     int y, h;
     if (m->kind == 2) {
-        y = id * m->row;
+        y = id / m->cols * m->row;
         h = m->row;
     } else {
         int i = index_of(m, id);
