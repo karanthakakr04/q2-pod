@@ -707,7 +707,7 @@ def test_no_lcd_paints_nothing(fw, st, ui):
     assert canvas.rects == canvas.texts == []
 
 
-# Classic's battery: the set's body with its outline and gloss, Icon or Percent Inside.
+# Classic's battery: the set's body with its outline and gloss, Icon or % Inside.
 def classic_battery(fw, st, ui, light=0, mode=0):
     theme(fw, st, CLASSIC, light, BATTERY=mode)
     bar = Bar(fw, ui)

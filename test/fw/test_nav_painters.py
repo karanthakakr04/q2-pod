@@ -1831,7 +1831,7 @@ def test_bluetooth_adds_resume_and_device_volume_after_its_fourth_row(fw, bt):
     assert [r.name for r in rows[:4] + rows[6:]] == [f's{i}' for i in range(7)]
     for r in ours:
         click(ui, r)
-    assert [key for key, _ in settings.written] == ['RESUME', 'BTVOLLINK']  # Resume on Connect, Control Device Volume
+    assert [key for key, _ in settings.written] == ['RESUME', 'BTVOLLINK']  # Resume on Connect, Sync Device Volume
     assert [r.box[3] for r in ours] == [rows[0].box[3]] * 2
     beside = ui.add('scroll_view', win, (0, 0, 375, 100), 'beside')  # a settings row with an icon
     with_icon = ui.nodes[fw.fn('list_row', C.c_void_p, C.c_void_p, C.c_char_p, C.c_void_p, C.c_void_p)(beside.addr, b'icon', None, None)]
@@ -1846,7 +1846,7 @@ def test_device_volume_off_gives_stock_its_gain_back_at_once(fw, way, sent):
     g(fw, 'g_volume', 37)
     fw.mock('mclGetOutputWay', lambda *_: way)
     fw.fn('ringnav_btrows', C.c_int, C.c_void_p, C.c_void_p)(win.addr, None)
-    link = row(ui, view, 'Control Device Volume')
+    link = row(ui, view, 'Sync Device Volume')
     bt_link = fw.fn('navigation__bt_link', C.c_int)
     assert switch(link) == 'switch_on' and bt_link() == 1
     click(ui, link)
@@ -2001,7 +2001,7 @@ def test_key_tone_shows_click_with_headphones_while_on(fw, st, scratch, was):
     item = ui.add('list_item', view, (0, 0, 375, 70), 'click_hp')
     button = ui.add('button', item, (20, 0, 335, 70))
     hp = ui.add('hscroll_label', button, (72, 0, 260, 70))
-    slot = scratch['setting_label'] + SETTING['SETTING_KEYTONEHP'] * C.sizeof(C.c_void_p)  # Click With Headphones' label
+    slot = scratch['setting_label'] + SETTING['SETTING_KEYTONEHP'] * C.sizeof(C.c_void_p)  # Click in Headphones' label
     C.c_void_p.from_address(C.addressof(fw.var('st', C.c_char)) + slot).value = hp.addr
     tone = view.children[0]
     assert switch(tone) == ('switch_on' if was else 'switch_off')

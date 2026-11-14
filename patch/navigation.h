@@ -277,7 +277,7 @@ typedef struct {
         shortcut, rounded, light, light_day, /* light_day: Auto's answer for now (LIGHT=2) */
         keep_lit,                            /* Smart Awake (#57, keep_lit_poll) */
         np_centred,                          /* Centred Now Playing (ringnav_ui_load) */
-        keytone_hp,                          /* Click With Headphones (ringnav_buzzer) */
+        keytone_hp,                          /* Click in Headphones (ringnav_buzzer) */
         scrub_single,                        /* Single Press Scrub (np_key) */
         theme_booted,                        /* theme_boot ran (ringnav_ui_load) */
         raw_ink,                             /* a final colour's draw: ui_ink leaves it alone */

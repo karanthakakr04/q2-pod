@@ -1844,7 +1844,7 @@ static void depth(void) {
     tex_fail = 0;
 }
 
-/* Display settings' Cover Flow Sort (coverflow_sort_step): each press takes the next order, saved and
+/* Display settings' Cover Flow → Sort (coverflow_sort_step): each press takes the next order, saved and
    taken at the next open; ties keep the stock order. */
 static const char *album_at(int i) {
     static char got[160];

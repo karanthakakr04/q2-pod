@@ -1228,7 +1228,7 @@ def battery_checks():
         assert b.get(w['view_battery']+O['W_W'])==pct and not bands
         assert [(l['text'],l['rect'],l['color']) for l in letters]==[(f'{value}%',(0,0,pct,30),color_t(rgb))]
 
-    # Percent Inside: compact rounded body and dark digits, including 100, in every state.
+    # % Inside: compact rounded body and dark digits, including 100, in every state.
     for theme in (0,2):
         b,bar,w,paint=battery_bar(3); b.config['THEME']=str(theme)
         b.nodes[w['img_bt']]['visible']=0
@@ -1242,7 +1242,7 @@ def battery_checks():
                 assert [x[:5] for x in bands]==[(bw,y+(bh-nh)//2,O['BATT_NUB_W'],nh,color_t(rgb))]
                 assert [(r['kind'],r['rect'],r['color'],r['radius']) for r in b.rounded]==[('fill',(0,y,bw,bh),color_t(rgb),3)]
                 assert [(l['text'],l['rect'],l['color'],l['font'],l['align']) for l in letters]==[(str(value),(2,y+O['BATT_INSIDE_TEXT_DY'],bw-4,bh),color_t(0),('default',O['BATT_INSIDE_PX']),(1,1))]
-    # Percent Inside fits beside the widest codec and Wi-Fi.
+    # % Inside fits beside the widest codec and Wi-Fi.
     b,bar,w,paint=battery_bar(3); b.nodes[w['label_battery']]['text']='100%'
     b.nodes[w['img_bt']]['image']='bar_aptxhd'
     paint(); assert b.get(w['view_battery']+O['W_W'])==O['BATT_INSIDE_W']+O['BATT_NUB_W']
@@ -4845,7 +4845,7 @@ assert ov.config=={'VOLUME':'7','OTHER':'8'}; passed()  # other writes keep thei
 class BtVolumeMachine(Machine):
     def __init__(self,link=True):
         super().__init__()
-        if link: self.config['BTVOLLINK']='1'  # Bluetooth's Control Device Volume
+        if link: self.config['BTVOLLINK']='1'  # Bluetooth's Sync Device Volume
         self.absolute=10; self.write_result=0; self.way=1
         self.byte(syms['g_bluetoothflag'],1); self.byte(syms['bt_linkstatus'],1)
         self.word(syms['bt_showcoding'],1); self.byte(syms['g_volume'],20); self.byte(syms['g_maxvolume'],100)
@@ -4876,7 +4876,7 @@ for left,right,want in ((0,0,0),(0,20,25),(20,0,25),(1,1,1),(20,20,25),(40,30,51
     gain=(max(0,left)*100//max(left,right),max(0,right)*100//max(left,right)) if want else (left,right)  # AVRCP 0 isn't silent on every headset: keep stock's mute
     b=BtVolumeMachine(); assert b.volume(left,right)==[gain] and b.writes()==[want]
     assert b.volume(left,right)==[gain] and not b.writes(); passed()
-# Control Device Volume off (the default): the Q2's volume is stock's gain alone, the device's own
+# Sync Device Volume off (the default): the Q2's volume is stock's gain alone, the device's own
 # volume is never read or written, and the poll leaves it be.
 b=BtVolumeMachine(link=False); assert b.volume(20,20)==[(20,20)] and b.volume(40,30)==[(40,30)]
 b.poll(); b.poll(); assert not [c for c in b.calls if c[0].startswith('btctl_')]; passed()
@@ -6182,10 +6182,6 @@ for only_focus,want,stepped in ((1,7,False),(0,None,True)):
     info=m.alloc(0x58); m.word(info+0x20,t)
     ret=m.call(address=0x5fb744,args=(info,0,0,0),gap=0); names=[c[0] for c in m.calls]
     assert ('hscroll_label_step' in names)==stepped and ('hscroll_label_stop' in names)==(not stepped) and want in (None,ret),(names,ret); passed()
-# The rows this polish renamed or added fit stock's ellipsis: the settings text's 275 px less its 4 px of margins.
-from fontTools.ttLib import TTFont
-font=TTFont(B/'default.ttf'); advance=lambda s: sum(font['hmtx'][font.getBestCmap()[ord(c)]][0] for c in s)*24/font['head'].unitsPerEm
-assert all(advance(s)<=271 for s in ('Artist View: Cover Flow','Refresh Cover Flow','Cover Flow Sort: Album','Time in Title')); passed()
 # Every scrolling label's holds and pace (ringnav_hscroll_start, ringnav_hscroll_lull) through stock's
 # own hscroll_label code, run from the image: start, its delay, tick (0x5fb744), step, lull and stop.
 # A label shows its offset while it runs; stopped, stock paints its start with the ellipsis ('rest').
@@ -7644,7 +7640,7 @@ hit=named(xf0,xf0.win,'switch_hit'); f,ctx=next((f,c) for t,f,c in xf0.nodes[hit
 assert xf0.call(address=f,args=(ctx,xf0.event,0,0),gap=0)==0 and xf0.clicks==[xf0.switch]; passed()
 xf0.calls=[]; assert xf0.call(O['KEY_NEXT'])==11 and dirty(xf0,xf0.win)==[(125,28,125,44)]; passed()  # the wheel can turn it on: the tray repaints, and only it
 ns=boot_page(ctx=3); assert ns.nodes[named(ns,ns.win,'caption')]['text']=='Press Centre to Change Mode'; bare(ns); bg(ns,ns.win); assert shadows(ns)[-1][0]=='Press Centre to Change Mode'; passed()  # Centre cycles here
-wheel=boot_page(ctx=1); wsw=wheel.switch; assert wheel.nodes[wheel.title]['text']=='Wheel Sensitivity' and not wheel.nodes[wsw]['visible'] and wheel.nodes[wheel.vol]['visible']==1 and wheel.nodes[wheel.vol]['text']=='50%'
+wheel=boot_page(ctx=1); wsw=wheel.switch; assert wheel.nodes[wheel.title]['text']=='Sensitivity' and not wheel.nodes[wsw]['visible'] and wheel.nodes[wheel.vol]['visible']==1 and wheel.nodes[wheel.vol]['text']=='50%'
 bare(wheel); bg(wheel,wheel.win); assert art_at(wheel)==BAND_ART and shadows(wheel)==[CAPTION] and not triangle(wheel)
 wheel.calls=[]; assert wheel.call(O['KEY_NEXT'])==11 and [c for c in wheel.calls if c[0]=='write_int_config'] and not dirty(wheel,wheel.win); passed()  # no tray
 # The dark bar: the dark half's flat bar and hairline in either half while a slider page is on top, title across on the bar title's rows, clock and marks hidden; back on leaving.
@@ -10043,7 +10039,7 @@ for want,saved in (('Sort: Artist',1),('Sort: Year',6),('Sort: Most Played',3),(
 passed()
 m.close(); m.stack.remove(m.page); m.top=m.stack[-1]; m.open(); assert len(m.nodes[m.slide]['children'])==3
 assert shown(m,2)=='Album 2'; passed()
-# Display settings' Cover Flow Sort (navigation.c's pod rows): each press saves the next of Album, Artist,
+# Display settings' Cover Flow → Sort (navigation.c's pod rows): each press saves the next of Album, Artist,
 # Year, Recently Added, Most Played and Random, round again, which Coverflow takes at its next open; the
 # next album hold follows the reordered deque.
 m=AlbumRateMachine(); m.word(m.albums[2]+O['REC_ARTIST'],m.string('Aardvark'))
@@ -11982,7 +11978,7 @@ keep_lit=kids[2]
 assert m.icons_set==['system_display','switch_off','display_backlight','list_into','system_display','list_into','playset_covermode','list_into']
 f,ctx=m.handler(m.nodes[kids[5]]['children'][0],O['EVT_CLICK']); m.calls=[]
 assert m.call(address=f,args=(ctx,m.event,0,0),gap=0)==0 and m.opened[-1]==('systemset/display_page',None) and m.get(payload_syms['display_sub'])==0; passed()
-# Cover Flow: Artist View, Playlist View, Cover Flow Sort, Refresh Cover Flow, Fast Navigation; Controls, System's
+# Cover Flow: Artist View, Playlist View, Sort, Refresh Cover Flow, Fast Navigation; Controls, System's
 # row: the wheel, the buttons and what they do.
 cfv=display_page(m,2); cf,cf_pl,cf_sort,cf_refresh,cf_big,cf_durations,cf_position=m.nodes[cfv]['children']
 assert m.icons_set==['playset_covermode']*3+['system_update','playset_covermode','switch_off','playset_covermode','switch_on','playset_covermode','switch_off'],m.icons_set  # Scan Song Durations: SEED's on
@@ -12260,7 +12256,7 @@ bm,bw_,bands=classic_light_battery_bar(0,'bar_charge','63%')  # full, then the b
 assert [b[:4] for b in bands[LEVEL:LEVEL+11]]==[(BX,y+1+j,BW,1) for j in range(11)] and 'classic_light_bolt' in [bm.text(c[2]) for c in bm.calls if c[0]=='widget_load_image']
 assert bm.image_draws==[((0,0,BW,11),(BX,y+1,BW,11))],bm.image_draws
 # Full on power, a Q2 on the charger: the plain icon's status from stock, the cable from stock's flag, both memory; the
-# level full and the plug drawn. Either one alone: no glyph. Charging wins over Full. Percent Inside keeps its digits, no glyph.
+# level full and the plug drawn. Either one alone: no glyph. Charging wins over Full. % Inside keeps its digits, no glyph.
 bm,bw_,bands=classic_light_battery_bar(0,'bar_battery','100%',state=2,cable=1)
 assert bands[LEVEL:LEVEL+11]==[(BX,y+1+j,BW,1,color_t(c)) for j,c in enumerate(ROWS)] and 'classic_light_plug' in [bm.text(c[2]) for c in bm.calls if c[0]=='widget_load_image']
 assert bm.image_draws==[((0,0,BW,11),(BX,y+1,BW,11))],bm.image_draws
@@ -12268,16 +12264,16 @@ for state,cable in ((2,0),(1,1),(0,1)):
     bm,bw_,bands=classic_light_battery_bar(0,'bar_battery','100%',state=state,cable=cable); assert not bm.image_draws,(state,cable)
 bm,bw_,bands=classic_light_battery_bar(0,'bar_charge','100%',state=2,cable=1); assert 'classic_light_plug' not in [bm.text(c[2]) for c in bm.calls if c[0]=='widget_load_image']
 bm,bw_,bands=classic_light_battery_bar(3,'bar_battery','100%',state=2,cable=1); assert not bm.image_draws and [l['text'] for l in bm.letters]==['100']; passed()
-bm,bw_,bands=classic_light_battery_bar(3,'bar_charge','63%')  # Percent Inside: digits, no bolt
+bm,bw_,bands=classic_light_battery_bar(3,'bar_charge','63%')  # % Inside: digits, no bolt
 assert not bm.image_draws; passed()
 bm,bw_,bands=classic_light_battery_bar(0,'bar_lowcharge','5%')
 assert bands[LEVEL:]==[(BX,y+1,3,11,color_t(0xd9402e))]+SHADE+EMBOSS; passed()
 bm,bw_,bands=classic_light_battery_bar(1)  # Percent: the digits and sign alone, no body
 assert [l['text'] for l in bm.letters]==['50%'] and bands[:LEVEL]!=outline; passed()
-for mode in (2,3):  # Percent Inside (digits in the body), and the stored value that reads as it
+for mode in (2,3):  # % Inside (digits in the body), and the stored value that reads as it
     bm,bw_,bands=classic_light_battery_bar(mode); letters=[(l['text'],l['rect']) for l in bm.letters]
     assert letters==[('50',(BX,y+1,BW,11))]*2 and bands[:LEVEL]==outline and bm.get(bw_['view_battery']+O['W_W'])==29,(mode,letters); passed()
-# Percent Inside's digits read in both halves: dark on the level, whatever its colour (the gloss, full while
+# % Inside's digits read in both halves: dark on the level, whatever its colour (the gloss, full while
 # charging, the sliver when low), and past its end white, on the dark rows, in both halves.
 # Each part is clipped to its side of the level's end, and the canvas's clip comes back.
 for lt,past in (('1',0xffffff),('0',0xffffff)):
@@ -12288,7 +12284,7 @@ for lt,past in (('1',0xffffff),('0',0xffffff)):
         assert bm.clip not in [w[3] for w in want]
 passed()
 # Classic's bar shows no EQ (its label is off-screen: tools/ipod.py), so the payload leaves the label as stock set it
-# and it takes none of the group's room. Percent Inside, the width of the icon, keeps its digits beside Wi-Fi, a wide
+# and it takes none of the group's room. % Inside, the width of the icon, keeps its digits beside Wi-Fi, a wide
 # codec badge or not.
 for status,eq in ((0,0),(2,0),(0,1),(2,1)):
     bm,bw_,bands=classic_light_battery_bar(3,status=status,eq=eq,wifi=1)
@@ -12400,11 +12396,11 @@ assert m.call(address=f,args=(ctx,m.event,0,0),gap=0)==0 and m.nodes[pl_label]['
 assert [(c[1],m.text(c[2]),m.text(c[3])) for c in m.calls if c[0]=='write_int_config']==[(1,'Q2POD','PLAYLISTCF')]
 m.call(address=f,args=(ctx,m.event,0,0),gap=0); assert m.nodes[pl_label]['text']=='Playlist View: List'
 assert [(c[1],m.text(c[2]),m.text(c[3])) for c in m.calls if c[0]=='write_int_config'][-1]==(0,'Q2POD','PLAYLISTCF'); passed()
-# Cover Flow Sort and Refresh Cover Flow (coverflow.c), the library Coverflow's Sort and Refresh cards
+# Sort and Refresh Cover Flow (coverflow.c), the library Coverflow's Sort and Refresh cards
 # before: no saved order is Album; Refresh empties the art cache for the next open, and stock's Library covers
 # with AWTK's cached bitmaps, with a toast.
 sort_label,refresh_label=(m.nodes[m.nodes[r]['children'][0]]['children'][1] for r in (cf_sort,cf_refresh))
-assert m.nodes[sort_label]['text']=='Cover Flow Sort: Album' and m.nodes[refresh_label]['text']=='Refresh Cover Flow'
+assert m.nodes[sort_label]['text']=='Sort: Album' and m.nodes[refresh_label]['text']=='Refresh Cover Flow'
 f,ctx=m.handler(m.nodes[cf_refresh]['children'][0],O['EVT_CLICK']); m.mock('opendir@GLIBC_2.0'); m.calls=[]
 assert m.call(address=f,args=(ctx,m.event,0,0),gap=0)==0 and m.toasts[-1][3]=='Cover Flow rebuilds artwork next time'
 assert [m.text(c[1]) for c in m.calls if c[0]=='opendir@GLIBC_2.0']==['/mnt/mmc/.coverflow','/mnt/mmc/.sldp']
@@ -12470,9 +12466,9 @@ def shortcut_cycle(labels):
             assert m.nodes[named(m,home,'label_rockbox')]['text']==('Rockbox' if m.rockbox_mode else 'Favorites')
             assert not m.nodes[named(m,home,'btn_rockbox')]['visible']
         else: assert m.nodes[named(m,home,'label_rockbox')]['text']==label
-shortcut_cycle(('Favorites','Shuffle','Rated Albums','Playlists','Artists','Albums','Games','Podcasts','Audiobooks','None','Rockbox'))
+shortcut_cycle(('Favorites','Shuffle','Rated','Playlists','Artists','Albums','Games','Podcasts','Audiobooks','None','Rockbox'))
 m.groovebox_mode=0o100755  # Groovebox on the card: the cycle offers it after Audiobooks
-shortcut_cycle(('Favorites','Shuffle','Rated Albums','Playlists','Artists','Albums','Games','Podcasts','Audiobooks','Groovebox','None','Rockbox'))
+shortcut_cycle(('Favorites','Shuffle','Rated','Playlists','Artists','Albums','Games','Podcasts','Audiobooks','Groovebox','None','Rockbox'))
 m.groovebox_mode=0
 home_bounds(False); carousel(False)
 writes=click(1); assert [(w[0],m.text(w[2])) for w in writes]==[(1,'HOME')] and texts()[1]=='Home: Full'
@@ -12546,12 +12542,12 @@ for value,name in ((1,'Crimson'),(2,'Tidal'),(3,'Champagne'),(4,'Cobalt'),(5,'Ta
     m.paint(view); assert not m.bands and m.rounded[0]['color']==color_t(0xeeeeec if value==7 else ACCENTS[value][0])
 passed()
 bar=m.node('window','system_bar'); m.word(syms['system_bar'],bar)
-for value,name in ((1,'Percent'),(2,'Icon + Percent'),(3,'Percent Inside'),(0,'Icon')):
+for value,name in ((1,'Percent'),(2,'Icon + Percent'),(3,'% Inside'),(0,'Icon')):
     writes=click(2); assert [(w[0],m.text(w[2])) for w in writes]==[(value,'BATTERY')] and texts()[2]=='Battery: '+name
     assert ('widget_invalidate_force',bar) in [c[:2] for c in m.calls] and not [c for c in m.calls if c[0]=='image_manager_unload_all']
 passed()
 m,view,rows=display({'ACCENT':'2','HOME':'1','BATTERY':'2','SHORTCUT':'1'}); got=[m.nodes[m.nodes[m.nodes[r]['children'][0]]['children'][1]]['text'] for r in rows]; assert got==['Accent: Ivory','Home: Full','Battery: Icon + Percent','Theme: Minimal']; passed()
-m,view,rows=display({'BATTERY':'3'}); assert m.nodes[m.nodes[m.nodes[rows[2]]['children'][0]]['children'][1]]['text']=='Battery: Percent Inside'; passed()
+m,view,rows=display({'BATTERY':'3'}); assert m.nodes[m.nodes[m.nodes[rows[2]]['children'][0]]['children'][1]]['text']=='Battery: % Inside'; passed()
 # Home's Rockbox row (docs/boot.md#rockbox-from-home): its click saves the queue as power-off does,
 # stops the player, leaves S90play's flag and kills demo; without Rockbox on the card it says so.
 class RockboxMachine(Machine):
@@ -12975,6 +12971,39 @@ for builder in (0x4ca914, 0x4d3594, 'display'):  # language, System settings, Di
             if m.nodes[c]['type']=='image' and w_==O['SET_STOCK_ICON']: assert not m.nodes[c]['visible'],builder
             elif m.nodes[c]['type']=='hscroll_label' and m.nodes[c]['name']!='_setting_value': assert x==SET['TEXT_X'] and 0<=y and y+h<=32,(builder,x,y,h)
 passed()
+# No settings label the payload builds is cut off (docs/internals.md#settings-labels): in every theme, each row's text, Classic's
+# value too, fits its laid-out box, a value row at each value a Centre steps it to and a slider's row at its widest. Model
+# (status_metrics'): stb scales ascent - descent to the size, the box less hscroll_label's 2 px each side. A string key's
+# text is stock's translation. ponytail: inferred, kerning not counted; pages built elsewhere aren't run (internals lists them).
+from fontTools.ttLib import TTFont
+FACES={}
+def label_room(m,c):  # px its text needs beyond its box
+    n=m.nodes[c]; face=n.get('style:normal:font_name','default'); px=n.get('style:normal:font_size') or int(re.search(r'(\d+)[lcr]$',n['style'])[1])
+    f=FACES.get(face) or FACES.setdefault(face,TTFont(B/f'{face}.ttf',lazy=True)); cmap=f.getBestCmap()
+    return sum(f['hmtx'][cmap[ord(ch)]][0] for ch in n['text'])*px/(f['hhea'].ascent-f['hhea'].descent)+4-geometry(m,c)[2]
+def row_labels(m,k):
+    n=m.nodes[k]
+    if n['type']=='hscroll_label' and n.get('text') and not re.fullmatch(r'[a-z0-9_]+',n['text']): yield k
+    for c in n.get('children',[]): yield from row_labels(m,c)
+stock_page=lambda name: lambda k: k.handlers.__setitem__(int(manifest['patch_symbols'][f'stock_{name}_trampoline'],16),'stock_'+name)
+playset=HOOKS['playset_playset_page_init'][0]
+for boot,row in ((lambda k:k.config.update(THEME='0'),SET['ROW']),(lambda k:k.config.update(THEME='2'),SET['ROW']),(classic_light_boot,32)):
+    for builder,sub,more in [('display',s,None) for s in range(4)]+[(HOOKS['systemset_sysset_page_init'][0],0,None),(playset,0,None),
+                             (playset,0,lambda k:k.word(payload_syms['playset_sub'],1)),(HOOKS['systemset_powermanager_page_init'][0],0,stock_page('power')),
+                             (HOOKS['btmenu_rows'][0],0,lambda k:(stock_page('btrows')(k),k.byte(syms['g_bluetoothflag'],1)))]:
+        CONFIG.clear(); CONFIG.update(WHEELSENSITIVITY='200',RESUMEMIN='120',XFADE='1',XFADESEC='15',LIGHT='2')
+        m,view=settings(builder,default=row,sub=sub,boot=lambda k:(boot(k),k.byte(syms['g_keytone_flag'],1),more and more(k))); lay(m,view)
+        for r in m.nodes[view]['children']:
+            b=m.nodes[r]['children'][0]; f,ctx=m.nodes[b].get('click',(0,0)); seen=[]
+            while m.nodes[r].get('visible',1):  # a value row: Centre until its text comes round; a switch, a chevron or stock's row stays
+                labels=list(row_labels(m,r)); texts=[m.nodes[c]['text'] for c in labels]
+                if texts in seen: break
+                seen.append(texts)
+                for c in labels: assert label_room(m,c)<=0,(builder,sub,m.nodes[c]['text'],label_room(m,c))
+                if f<BASE or not texts or any(k.get('image')=='list_into' or k.get('name')=='_setting_switch' or k.get('name')=='_setting_value' and k.get('text') in ('On','Off')
+                                              for k in (m.nodes[k] for k in m.nodes[b]['children'])): break
+                assert m.call(address=f,args=(ctx,m.event,0,0),gap=0)==0
+CONFIG.clear(); passed()
 CONFIG.clear(); m,view=settings(0x4d3594,boot=classic_light_boot); before=tree(m,view); lay(m,view)
 after=tree(m,view); assert [r[1] for r in after]==[r[1] for r in before] and all(r[0][3]==SET['ROW'] for r in after); passed()  # rows as built, stacked at the list's 68
 # A 78px item some other builder made (no stock settings button) keeps its height and children.
@@ -13284,36 +13313,36 @@ def art_boot(config):  # the names a fresh Classic's first system_bar loaded, wi
 assert art_boot({})==art_boot({'ROWART':'1'})==art_boot({'ROWART':'2'})==['classic-light_system_bar']
 assert art_boot({'ROWART':'0'})==['classic-light-text_system_bar']
 passed()
-# Battery under Classic takes Icon, Percent or Percent Inside (theme.xml's values, 9db418f7): the row cycles those three
-# and writes the key as usual. A stored Icon + Percent reads as Percent Inside and stays stored; a key that is not
+# Battery under Classic takes Icon, Percent or % Inside (theme.xml's values, 9db418f7): the row cycles those three
+# and writes the key as usual. A stored Icon + Percent reads as % Inside and stays stored; a key that is not
 # stored reads as Icon. Minimal and Classic on the same build keep all four, whatever Classic's values say.
 m,view,_=display({},setup=classic_light); row=m.nodes[view]['children'][8]; f,ctx=m.handler(m.nodes[row]['children'][0],O['EVT_CLICK'])
 assert row_text(row)=='Battery: Icon'
-for value,name in ((1,'Percent'),(3,'Percent Inside'),(0,'Icon'),(1,'Percent')):
+for value,name in ((1,'Percent'),(3,'% Inside'),(0,'Icon'),(1,'Percent')):
     m.calls=[]; assert m.call(address=f,args=(ctx,m.event,0,0),gap=0)==0
     assert [(c[1],m.text(c[3])) for c in m.calls if c[0]=='write_int_config']==[(value,'BATTERY')] and row_text(row)=='Battery: '+name
 passed()
-# Percent Inside fits its value box at the row's 27 px, inside the 2 px hscroll_label keeps each side by default (stock
-# draws an ellipsis past that). The box ends at screen x 356 and the title stops 8
-# short of it.
+# % Inside fits its value box at the row's 27 px, inside the 2 px hscroll_label keeps each side by default (stock
+# draws an ellipsis past that). As built, the box ends at screen x 356 and the title stops 8
+# short of it; the settings layout narrows both (every label's laid-out box: label_room, with the settings rows).
 from fontTools.ttLib import TTFont
 from ipod import CLASSIC_LIGHT_FONT_SRC
 face=TTFont(CLASSIC_LIGHT_FONT_SRC,lazy=True); glyphs=face.getBestCmap()
 def row_w(text): return sum(face['hmtx'][glyphs[ord(c)]][0] for c in text)*27/(face['hhea'].ascent-face['hhea'].descent)
 b=m.nodes[row]['children'][0]; title=m.nodes[b]['children'][1]; val=next(k for k in m.nodes[b]['children'] if m.nodes[k].get('name')=='_setting_value')
 vx,vw,bx=(m.get(val+O['W_X']),m.get(val+O['W_W']),m.get(b+O['W_X']))
-assert row_w('Percent Inside')<=vw-4 and bx+vx+vw==356
+assert row_w('% Inside')<=vw-4 and bx+vx+vw==356
 assert m.get(title+O['W_X'])+m.get(title+O['W_W'])==vx-8; passed()
 for stored in ('2',):
     m,view,_=display({'BATTERY':stored},setup=classic_light); row=m.nodes[view]['children'][8]; f,ctx=m.handler(m.nodes[row]['children'][0],O['EVT_CLICK'])
-    assert row_text(row)=='Battery: Percent Inside' and not [c for c in m.calls if c[0]=='write_int_config'] and m.config['BATTERY']==stored
+    assert row_text(row)=='Battery: % Inside' and not [c for c in m.calls if c[0]=='write_int_config'] and m.config['BATTERY']==stored
     assert m.call(address=payload_syms['ipod_battery'],args=(0,0,0,0),gap=0)==3
     m.calls=[]; m.call(address=f,args=(ctx,m.event,0,0),gap=0)  # from what it reads as: on to Icon
     assert [(c[1],m.text(c[3])) for c in m.calls if c[0]=='write_int_config']==[(0,'BATTERY')] and row_text(row)=='Battery: Icon'
 passed()
-for t in ('0','2'):  # Minimal and Modern: every value is its own (Classic's Icon + Percent reads as Percent Inside, above)
+for t in ('0','2'):  # Minimal and Modern: every value is its own (Classic's Icon + Percent reads as % Inside, above)
     def on_t(k,t=t): classic_light(k); k.config['THEME']=t
-    for stored,name in (('0','Icon'),('1','Percent'),('2','Icon + Percent'),('3','Percent Inside')):
+    for stored,name in (('0','Icon'),('1','Percent'),('2','Icon + Percent'),('3','% Inside')):
         m,view,rows=display({'BATTERY':stored},setup=on_t)
         assert m.call(address=payload_syms['ipod_battery'],args=(0,0,0,0),gap=0)==int(stored) and row_text(rows[2])=='Battery: '+name,(t,stored)
 passed()
@@ -13552,7 +13581,7 @@ for kw,want in (({'status':1},1),({},1),({'status':2},1),({'po':1},0),({'bal':1}
     m=routed(audible(Machine()),**kw); m.call(address=syms['buzzeer_switch'],args=(1,0,0,0))
     assert buzzes(m)==want,kw
 m=routed(audible(Machine(),tone=0)); m.call(address=syms['buzzeer_switch'],args=(1,0,0,0)); assert not buzzes(m); passed()
-# Click With Headphones (IPOD KEYTONEHP=1): the buzzer clicks with either jack or BT/USB too, as stock; Key
+# Click in Headphones (IPOD KEYTONEHP=1): the buzzer clicks with either jack or BT/USB too, as stock; Key
 # Tone off is still silent.
 for kw,tone,want in (({'po':1},1,1),({'bal':1},1,1),({'way':1},1,1),({'way':2},1,1),({'po':1},0,0),({},0,0)):
     m=Machine(); m.config['KEYTONEHP']='1'; m=routed(audible(m,tone=tone),**kw)
@@ -18910,7 +18939,7 @@ passed()
 # Volume guard (#46; its wheel engine in test/playback.py): off by default, the dark wheel as stock;
 # the row saves VOLGUARD and sets wheel_guard, which the encoder thread reads.
 m,rows,texts,icons,click=settings_page('display','scroll_view_display',stock_rows=3,sub=3)
-assert texts()==['Wheel Sensitivity: 50%','Hold Return: Recent','Single Press Scrub','system_keytone','Click With Headphones','system_keylock','Wake: Single Press','Volume Guard']  # stock's two by key, for their translations
+assert texts()==['Sensitivity: 50%','Hold Return: Recent','Single Press Scrub','system_keytone','Click in Headphones','system_keylock','Wake: Single Press','Volume Guard']  # stock's two by key, for their translations
 assert icons==['system_display','playset_folderjump','playset_covermode','system_keytone','system_keytone','system_keylock','system_keylock','system_keylock']
 guard=lambda: m.get(payload_syms['wheel_guard'])
 assert guard()==0 and click(7)==[(1,'Q2POD','VOLGUARD')] and texts()[7]=='Volume Guard' and guard()==1
@@ -18943,7 +18972,7 @@ for v,on in (('1',1),('2',0),('0',0)):
     assert position_on(pm)==on,v
 passed()
 # Buttons Lock opens stock's page, as its row on System did. Key Tone, System's stock row before
-# (0x4cc49c): its byte and key; Click With Headphones shows while it is on, and saves IPOD KEYTONEHP.
+# (0x4cc49c): its byte and key; Click in Headphones shows while it is on, and saves IPOD KEYTONEHP.
 assert click(5)==[] and m.opened[-1]==('systemset/keylock_page',None)
 hp=rows[4]; assert m.nodes[hp]['visible']==0
 for on in (1,0):
@@ -19290,7 +19319,7 @@ assert texts()[0]=='Standby Limit: Off'; passed()  # out of range: Off
 # Enlarged Album Art flips stock's own byte and key.
 m,rows,texts,icons,click=settings_page('audioset','scroll_view_playset',stock_rows=13)
 assert len(rows)==8 and icons==['playset_gapless','playset_memplay','playset_balance','playset_balance','playset_folderjump','playset_maxvol','playset_bootvol','playset_covermode']
-assert texts()==['Crossfade: Off','Resume Songs: 30 min','Mono Audio','Swap L/R','Library & Folders','playset_maxvol','playset_bootvol','playset_covermode']
+assert texts()==['Crossfade: Off','Resume: 30 min','Mono Audio','Swap L/R','Library & Folders','playset_maxvol','playset_bootvol','playset_covermode']
 assert len(m.nodes[m.settings_view]['children'])==19 and not set(m.entries[11:])&set(m.nodes[m.settings_view]['children'])
 assert [click(5),m.opened[-1],click(6),m.opened[-1]]==[[],('playset/maxvol_page',None),[],('playset/bootvol_page',None)]
 m.byte(syms['g_bigcovermode'],0); assert click(7)==[(1,'PLAYSET','COVERMODE')] and m.u.mem_read(syms['g_bigcovermode'],1)==b'\1' and switch_image(m,rows[7])=='switch_on'
@@ -19562,7 +19591,7 @@ passed()
 for config,text in (({},'30 min'),({'RESUMEMIN':'0'},'Off'),({'RESUMEMIN':'120'},'120 min'),({'RESUMEMIN':'125'},'30 min'),
                     ({'RESUMEMIN':'22'},'30 min'),({'RESUMEMIN':'15'},'30 min'),({'RESUMEMIN':'x'},'30 min')):
     m,rows,texts,*_=settings_page('audioset','scroll_view_playset',config,stock_rows=13)
-    assert texts()[1]=='Resume Songs: '+text and m.nodes[m.nodes[m.nodes[rows[1]]['children'][0]]['children'][1]].get('name')=='label_resumemin',config
+    assert texts()[1]=='Resume: '+text and m.nodes[m.nodes[m.nodes[rows[1]]['children'][0]]['children'][1]].get('name')=='label_resumemin',config
 passed()
 # Wheel sensitivity (playback.c wheel_pct, test/playback.py's travel): Display → Controls' last row in both
 # builds, Q2POD WHEELSENSITIVITY as 1.0.6 saved it, 50% unless a canonical ten in 10-200.
@@ -19570,7 +19599,7 @@ for config,pct in (({},50),({'WHEELSENSITIVITY':'130'},130),({'WHEELSENSITIVITY'
                    ({'WHEELSENSITIVITY':'135'},50),({'WHEELSENSITIVITY':'210'},50),({'WHEELSENSITIVITY':'x'},50)):
     m,rows,texts,icons,click=settings_page('display','scroll_view_display',config,stock_rows=3,sub=3)
     label=m.nodes[m.nodes[rows[0]]['children'][0]]['children'][1]
-    assert texts()[0]==f'Wheel Sensitivity: {pct}%' and icons[0]=='system_display' and m.nodes[label]['name']=='label_wheel'
+    assert texts()[0]==f'Sensitivity: {pct}%' and icons[0]=='system_display' and m.nodes[label]['name']=='label_wheel'
     assert m.nodes[named(m,m.top,'scroll_view_display')]['children'][0]==rows[0],config  # the list's start
 passed()
 # Hold Return (Q2POD HOLDRETURN; compact_now_playing): Controls' row after Wheel sensitivity,
@@ -19584,14 +19613,14 @@ assert click(1)==[(1,'Q2POD','HOLDRETURN')] and texts()[1]=='Hold Return: Home'
 passed()
 # Wheel QS is gone: a saved Q2POD WHEELQS=1 is a key nobody reads, no row and nothing written.
 m,rows,texts,icons,click=settings_page('display','scroll_view_display',{'WHEELQS':'1'},stock_rows=3,sub=3)
-assert 'Wheel QS' not in texts() and texts()[:2]==['Wheel Sensitivity: 50%','Hold Return: Recent'] and click(1)==[(1,'Q2POD','HOLDRETURN')]; passed()
+assert 'Wheel QS' not in texts() and texts()[:2]==['Sensitivity: 50%','Hold Return: Recent'] and click(1)==[(1,'Q2POD','HOLDRETURN')]; passed()
 # Its row opens stock's Boot volume page re-dressed (crossfade.c): titled, no switch, the percent
 # beside the slider, which runs 50-200 in tens. The wheel and +/- step 10%, live and saved, the
 # slider snaps to a ten, a drag is live but saved once at its release, and Centre goes back (edit_key, as on Brightness).
 m,rows,texts,icons,click=settings_page('display','scroll_view_display',stock_rows=3,sub=3)
 display_page=m.top; m.stack=[m.top]; m.nodes[m.wm]=dict(type='window_manager',name='',children=m.stack,visible=1)
 assert click(0)==[] and m.top!=display_page and m.nodes[m.top]['name']=='bootvol_page'
-assert m.nodes[m.title]['text']=='Wheel Sensitivity' and m.nodes[m.switch]['visible']==0 and m.nodes[m.vol]['text']=='50%'
+assert m.nodes[m.title]['text']=='Sensitivity' and m.nodes[m.switch]['visible']==0 and m.nodes[m.vol]['text']=='50%'
 assert m.nodes[named(m,m.top,'view_bootvol')]['visible']==1 and m.nodes[named(m,m.top,'view_bootvol')]['enable']==1  # touch (#140)
 def press(w,kind=O['EVT_CLICK']):
     m.calls=[]; f,ctx=m.handler(w,kind); assert m.call(address=f,args=(ctx,m.event,0,0),gap=0)==0
@@ -19599,10 +19628,10 @@ def press(w,kind=O['EVT_CLICK']):
 def turn(key=O['KEY_NEXT']):
     assert m.call(key)==11; return [(c[1],m.text(c[2]),m.text(c[3])) for c in m.calls if c[0]=='write_int_config']
 W='Q2POD','WHEELSENSITIVITY'
-assert turn()==[(60,*W)] and m.nodes[m.vol]['text']=='60%' and texts()[0]=='Wheel Sensitivity: 60%'
+assert turn()==[(60,*W)] and m.nodes[m.vol]['text']=='60%' and texts()[0]=='Sensitivity: 60%'
 assert turn(O['KEY_PREV'])==[(50,*W)] and m.nodes[m.vol]['text']=='50%' and turn(O['KEY_PREV'])==[(40,*W)] and turn()==[(50,*W)]  # 50% is the default, not the bottom
-assert press(m.add)==[(60,*W)] and m.nodes[m.vol]['text']=='60%' and texts()[0]=='Wheel Sensitivity: 60%'
-assert press(m.dec)==[(50,*W)] and texts()[0]=='Wheel Sensitivity: 50%'
+assert press(m.add)==[(60,*W)] and m.nodes[m.vol]['text']=='60%' and texts()[0]=='Sensitivity: 60%'
+assert press(m.dec)==[(50,*W)] and texts()[0]=='Sensitivity: 50%'
 m.nodes[m.slider]['value']=3; assert press(m.slider,O['EVT_VALUE_CHANGED'])==[(10,*W)] and m.nodes[m.vol]['text']=='10%' and press(m.dec)==[] and turn(O['KEY_PREV'])==[]  # 10% is the bottom
 m.nodes[m.slider]['value']=127; assert press(m.slider,O['EVT_VALUE_CHANGED'])==[(130,*W)] and m.nodes[m.vol]['text']=='130%'
 m.nodes[m.slider]['value']=300; assert press(m.slider,O['EVT_VALUE_CHANGING'])==[] and m.nodes[m.vol]['text']=='200%'
@@ -19615,30 +19644,30 @@ m.nodes[m.slider]['value']=143; assert press(m.slider,O['EVT_VALUE_CHANGING'])==
 assert press(m.dec)==[(130,*W)] and turn()==[(140,*W)]
 m.echoes=0; m.nodes[m.slider]['value']=157; assert press(m.slider,O['EVT_VALUE_CHANGED'])==[(160,*W)] and m.echoes==1  # its snap to 160 echoes, unsaved
 m.nodes[m.slider]['value']=300; assert press(m.slider,O['EVT_VALUE_CHANGING'])==[] and press(m.add)==[(200,*W)]
-assert texts()[0]=='Wheel Sensitivity: 200%' and m.nodes[m.switch]['visible']==0
+assert texts()[0]=='Sensitivity: 200%' and m.nodes[m.switch]['visible']==0
 assert m.confirm()==11 and [c[0] for c in m.calls].count('navigator_back')==1; passed()
 # Resume Songs' row opens the same page: no switch, Off below 20, then 20-120 min in fives, live and
 # saved (a drag at its release); Centre goes back.
 m,rows,texts,icons,click=settings_page('audioset','scroll_view_playset',stock_rows=13)
 m.stack=[m.top]; m.nodes[m.wm]=dict(type='window_manager',name='',children=m.stack,visible=1)
-assert click(1)==[] and m.nodes[m.top]['name']=='bootvol_page' and m.nodes[m.title]['text']=='Resume Songs'
+assert click(1)==[] and m.nodes[m.top]['name']=='bootvol_page' and m.nodes[m.title]['text']=='Resume'
 assert m.nodes[m.switch]['visible']==0 and m.nodes[m.vol]['text']=='30 min'
 R='Q2POD','RESUMEMIN'
-assert turn()==[(35,*R)] and m.nodes[m.vol]['text']=='35 min' and texts()[1]=='Resume Songs: 35 min'
+assert turn()==[(35,*R)] and m.nodes[m.vol]['text']=='35 min' and texts()[1]=='Resume: 35 min'
 assert press(m.dec)==[(30,*R)] and turn(O['KEY_PREV'])==[(25,*R)] and turn(O['KEY_PREV'])==[(20,*R)]
-assert turn(O['KEY_PREV'])==[(0,*R)] and m.nodes[m.vol]['text']=='Off' and texts()[1]=='Resume Songs: Off'
+assert turn(O['KEY_PREV'])==[(0,*R)] and m.nodes[m.vol]['text']=='Off' and texts()[1]=='Resume: Off'
 assert turn(O['KEY_PREV'])==[] and press(m.add)==[(20,*R)]  # Off is the bottom; up from it is 20
 m.nodes[m.slider]['value']=63; assert press(m.slider,O['EVT_VALUE_CHANGED'])==[(65,*R)] and m.nodes[m.vol]['text']=='65 min'
 m.nodes[m.slider]['value']=300; assert press(m.slider,O['EVT_VALUE_CHANGING'])==[] and m.nodes[m.vol]['text']=='120 min'
 assert press(m.slider,O['EVT_VALUE_CHANGED'])==[(120,*R)] and turn()==[]
-m.nodes[m.slider]['value']=15; assert press(m.slider,O['EVT_VALUE_CHANGED'])==[(0,*R)] and texts()[1]=='Resume Songs: Off'
+m.nodes[m.slider]['value']=15; assert press(m.slider,O['EVT_VALUE_CHANGED'])==[(0,*R)] and texts()[1]=='Resume: Off'
 assert m.confirm()==11 and [c[0] for c in m.calls].count('navigator_back')==1
 # A page closed mid-drag saves the dragged value once, as it closes.
 m,rows,texts,icons,click=settings_page('audioset','scroll_view_playset',stock_rows=13)
 m.stack=[m.top]; m.nodes[m.wm]=dict(type='window_manager',name='',children=m.stack,visible=1)
 assert click(1)==[]
-m.nodes[m.slider]['value']=53; assert press(m.slider,O['EVT_VALUE_CHANGING'])==[] and texts()[1]=='Resume Songs: 55 min'
-assert press(m.top,O['EVT_DESTROY'])==[(55,*R)] and texts()[1]=='Resume Songs: 55 min'; passed()
+m.nodes[m.slider]['value']=53; assert press(m.slider,O['EVT_VALUE_CHANGING'])==[] and texts()[1]=='Resume: 55 min'
+assert press(m.top,O['EVT_DESTROY'])==[(55,*R)] and texts()[1]=='Resume: 55 min'; passed()
 # Crossfade's row opens it with its switch: Off or XF_MIN..XF_MAX s. A drag saves both keys at its
 # release; the switch, +/- and the wheel save each change.
 m,rows,texts,icons,click=settings_page('audioset','scroll_view_playset',stock_rows=13)
@@ -19762,12 +19791,12 @@ for clock,hooked in (((22,0),True),((6,59),True),((7,0),False),('localtime',Fals
     m,fb,end=tint_machine({'NIGHTSHIFT':'2'},clock=clock); m.call(address=payload_syms['night_paint'],args=(m.canvas,0,0,0),gap=0)
     assert (m.get(m.lcd+0x7c)==payload_syms['night_end'])==hooked,clock
 passed()
-# Bluetooth's list (btmenu_rows, rebuilt on every search) gains Resume on connect and Control Device Volume
+# Bluetooth's list (btmenu_rows, rebuilt on every search) gains Resume on connect and Sync Device Volume
 # with Bluetooth on, right after its fourth row, Bluetooth Headset Volume Control, as stock's rows: no icon,
 # 78 high. Both off unless Q2POD RESUME / BTVOLLINK is 1 (docs/internals.md#resume-on-connect,
 # #headset-controls-and-volume); off, the Q2's volume is its own gain and the device keeps its own volume.
 m,rows,texts,icons,click=settings_page('btrows','scroll_view_bluetooth',stock_rows=7)  # 5 rows, 2 devices
-assert len(rows)==2 and icons==[None,None] and texts()==['Resume on Connect','Control Device Volume']
+assert len(rows)==2 and icons==[None,None] and texts()==['Resume on Connect','Sync Device Volume']
 for k,row in enumerate(rows):
     kids=m.nodes[m.nodes[row]['children'][0]]['children']  # the label and its switch
     assert len(kids)==2 and m.get(kids[0]+O['W_X'])==10 and m.get(row+O['W_H'])==78 and switch_image(m,row)=='switch_off'
@@ -19776,7 +19805,7 @@ assert click(0)==[(1,'Q2POD','RESUME')] and switch_image(m,rows[0])=='switch_on'
 assert click(0)==[(0,'Q2POD','RESUME')] and switch_image(m,rows[0])=='switch_off'
 assert click(1)==[(1,'Q2POD','BTVOLLINK')] and switch_image(m,rows[1])=='switch_on'
 assert click(1)==[(0,'Q2POD','BTVOLLINK')] and switch_image(m,rows[1])=='switch_off'
-assert texts()==['Resume on Connect','Control Device Volume']; passed()
+assert texts()==['Resume on Connect','Sync Device Volume']; passed()
 m,rows,texts,*_=settings_page('btrows','scroll_view_bluetooth',{'RESUME':'1','BTVOLLINK':'1'},stock_rows=7)
 assert [switch_image(m,r) for r in rows]==['switch_on','switch_on']; passed()
 m,rows,*_=settings_page('btrows','scroll_view_bluetooth',stock_rows=1,bt=0)  # just the switch
@@ -21087,7 +21116,7 @@ print('M4B recognition/resume and headset routing, ear masks, manual cancellatio
 def endpoint(m,name,value=0):
     return m.call(address=payload_syms[name],args=(value,0,0,0),gap=0,clear=False)
 def ready_gain(m,ready,volume):
-    m.way=1; m.config['BTVOLLINK']='1'; m.word(payload_syms['bt_vol_link'],1)  # Control Device Volume on, read or not
+    m.way=1; m.config['BTVOLLINK']='1'; m.word(payload_syms['bt_vol_link'],1)  # Sync Device Volume on, read or not
     for name in ('g_bluetoothflag','bt_linkstatus'): m.byte(syms[name],1)
     m.word(syms['bt_showcoding'],1); m.byte(syms['g_volume'],volume)
     m.word(payload_syms['btvol']+4 if 'btvol' in payload_syms else payload_syms['btvol.1'],ready)  # clang may split scalar fields

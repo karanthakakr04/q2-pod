@@ -3112,12 +3112,12 @@ int ringnav_quick_settings(void *win, void *ctx) {
  * Power's Volume guard (VOLGUARD, playback.c's wheel_guard; docs/internals.md#volume-guard), and
  * Display's Hold Return (HOLDRETURN, compact_now_playing; docs/ipod.md#hold-return), and Power's
  * Standby limit (STANDBYLIMIT, ringnav_standby; docs/internals.md#standby-limit), and Bluetooth's
- * Control Device Volume (BTVOLLINK, bt_audio_ready; docs/internals.md#headset-controls-and-volume),
+ * Sync Device Volume (BTVOLLINK, bt_audio_ready; docs/internals.md#headset-controls-and-volume),
  * and Power's Smart Wi-Fi (SMARTWIFI, smart_poll; docs/internals.md#smart-wi-fi), and Display's
  * Fast Navigation (BIGLIBRARY, Cover Flow's letters; docs/internals.md#coverflow-thumb) and
  * Playlist View (PLAYLISTCF).
  */
-/* Bluetooth's Control Device Volume on: the Q2's volume is the device's own (bt_audio_ready). */
+/* Bluetooth's Sync Device Volume on: the Q2's volume is the device's own (bt_audio_ready). */
 static int bt_vol_link __attribute__((section(".scratch")));
 #define STR_(x) #x
 #define STR(x) STR_(x)
@@ -3283,7 +3283,7 @@ static void pod_text(int i) {
         { "Standby Limit: Off", "Standby Limit: " STR(STANDBY_LIMIT_1) " h",
           "Standby Limit: " STR(STANDBY_LIMIT_2) " h",
           "Standby Limit: " STR(STANDBY_LIMIT_3) " h" },
-        { 0 }, /* Control Device Volume: a switch */
+        { 0 }, /* Sync Device Volume: a switch */
         { 0 }, /* Coverflow Sort's from coverflow.c */
         { "Refresh Cover Flow" },
         { 0 }, /* EQ per Output: a switch */
@@ -3301,10 +3301,8 @@ static void pod_text(int i) {
         { "Update Notifications: Off", "Update Notifications: On" },
     };
     _Static_assert(sizeof names / sizeof *names == POD_COUNT, "a names entry per row");
-    if (i == POD_CF_SORT) {
-        char sort[48];
-        tk_snprintf(sort, sizeof sort, "Cover Flow %s", coverflow_sort_name());
-        widget_set_text_utf8(st.pod_label[i], sort);
+    if (i == POD_CF_SORT) { /* the Sort card's words, as Cover Flow's page holds the row */
+        widget_set_text_utf8(st.pod_label[i], coverflow_sort_name());
         return;
     }
     int v = i == POD_ARTISTS       ? I(artist_type, 0) == 1
@@ -3317,7 +3315,7 @@ static void pod_text(int i) {
     const char *toggle = i == POD_CHARGE           ? "Charge Limit (" STR(CHARGE_STOP) "%)"
                          : i == POD_RESUME         ? "Resume on Connect"
                          : i == POD_VOL_GUARD      ? "Volume Guard"
-                         : i == POD_BT_LINK        ? "Control Device Volume"
+                         : i == POD_BT_LINK        ? "Sync Device Volume"
                          : i == POD_KEYTONE        ? "Key Tone"
                          : i == POD_CARMODE        ? "In-Vehicle Mode"
                          : i == POD_SMART_WIFI     ? "Smart Wi-Fi"
@@ -3360,7 +3358,7 @@ static int pod_click(void *ctx, void *event) {
     } else if (i == POD_KEYTONE) {
         g_keytone_flag = !g_keytone_flag;
         write_int_config(g_keytone_flag, "SYSSET", "KEYTONE");
-        /* Click With Headphones, built just after this row on Controls, shows while it is on. */
+        /* Click in Headphones, built just after this row on Controls, shows while it is on. */
         void *item = P(P(st.setting_label[9], W_PARENT), W_PARENT);
         widget_set_visible(item, g_keytone_flag != 0, 0);
         widget_layout(P(item, W_PARENT));
@@ -3382,7 +3380,7 @@ static int pod_click(void *ctx, void *event) {
         if (i == POD_CF_POSITION) coverflow_position_reset();
         if (i == POD_HIDE_STREAM || i == POD_HIDE_FOLDER) coverflow_home_layout();
         st.charge_at = 0;
-        /* Control Device Volume: off, stock's gain back at once; on, bt_volume_poll's next pass
+        /* Sync Device Volume: off, stock's gain back at once; on, bt_volume_poll's next pass
          * sends the Q2's level to the device. */
         if (i == POD_BT_LINK && mclGetOutputWay() == 1)
             headset_volume_reset(), device_set_volume(g_volume, 0);
@@ -3421,7 +3419,7 @@ int ringnav_powermanager(void *win, void *ctx) {
 }
 /* The Bluetooth page's list (stock's local builder, btmenu_rows), rebuilt whole on every search and
  * link change: its rows, five with Bluetooth on (one, the switch, off), then the device lists.
- * With Bluetooth on, Resume on connect and Control Device Volume follow the fourth, Bluetooth
+ * With Bluetooth on, Resume on connect and Sync Device Volume follow the fourth, Bluetooth
  * Headset Volume Control (bt_adjvol), each time, iconless and 78 high as stock's rows. */
 int ringnav_btrows(void *win, void *ctx) {
     static const char *const icons[] = { 0 };
@@ -4005,7 +4003,7 @@ static void bar_sync(void *bar) {
     if (st.home_rockbox != rockbox_available() ||
         (shortcut() == SHORTCUT_GROOVEBOX && st.home_groovebox != groovebox_available()))
         coverflow_home_layout();
-    /* Classic's battery: the set's body, which Percent Inside keeps */
+    /* Classic's battery: the set's body, which % Inside keeps */
     const theme_t *T = theme(), *B = bar_theme();
     /* The look's rows off the row layout's, y 0 in every set's row. A relayout puts them back
      * there; this pass corrects them before the frame draws them. */
@@ -4033,7 +4031,7 @@ static void bar_sync(void *bar) {
         /* Classic: the play state shares the group */
         if (classic_row && st.bar_state && widget_get_visible(st.bar_state))
             reach += I(st.bar_state, W_W) + STATUS_GAP;
-        /* Classic's Percent Inside is the icon's own width: the icon would win no room */
+        /* Classic's % Inside is the icon's own width: the icon would win no room */
         if (reach > BATT_ROOM && !(classic_light && mode == 3)) mode = 0;
     }
     widget_set_visible(st.bar_icon, 0, 0);
@@ -6491,8 +6489,7 @@ int ringnav_image_add(void *manager, const char *name, void *bitmap) {
 static void setting_text(int i) {
     static const char *const home[] = { "Home: Split", "Home: Full", "Home: Carousel" },
                              *const battery[] = { "Battery: Icon", "Battery: Percent",
-                                                  "Battery: Icon + Percent",
-                                                  "Battery: Percent Inside" },
+                                                  "Battery: Icon + Percent", "Battery: % Inside" },
                              *const light[] = { "Light Mode: Off", "Light Mode: On",
                                                 "Light Mode: Auto" };
     int a = accent();
@@ -6529,9 +6526,9 @@ static void setting_text(int i) {
         row_label(st.setting_label[i], text);
         return;
     }
-    static const char *const toggles[] = { "Rounded Corners",       0,
-                                           "Smart Awake",           "Centred Now Playing",
-                                           "Click With Headphones", "Single Press Scrub",
+    static const char *const toggles[] = { "Rounded Corners",     0,
+                                           "Smart Awake",         "Centred Now Playing",
+                                           "Click in Headphones", "Single Press Scrub",
                                            "Time in Title" };
     if (i == 5 || i >= 7) {
         list_toggle(st.setting_label[i], toggles[i - 5], *setting_values[i]);
@@ -6586,7 +6583,7 @@ static int setting_click(void *ctx, void *event) {
     const theme_t *T = theme();
     int *value = option_slot(T, i), was = *value;
     const char *key = option_key(T, i);
-    /* Rockbox, Favorites, Shuffle, Rated Albums, Playlists, Artists, Albums, Games, Podcasts,
+    /* Rockbox, Favorites, Shuffle, Rated, Playlists, Artists, Albums, Games, Podcasts,
      * Audiobooks, Groovebox (skipped unless the card has it; Rockbox is always offered), None */
     static const int shortcut_next[] = {
         3, 2, 6, 5, 7, 4, 8, 1, 9, SHORTCUT_GROOVEBOX, SHORTCUT_NONE, 0
@@ -6917,7 +6914,7 @@ int ringnav_display(void *win, void *ctx) {
     pod_rows(win, "scroll_view_display", POD_HOLD_HOME, 1, hold_icon);
     setting_row(view, 10);
     pod_rows(win, "scroll_view_display", POD_KEYTONE, 1, tone_icon);
-    setting_row(view, 9); /* Click With Headphones shows while Key Tone is on */
+    setting_row(view, 9); /* Click in Headphones shows while Key Tone is on */
     widget_set_visible(P(P(st.setting_label[9], W_PARENT), W_PARENT), g_keytone_flag != 0, 0);
     widget_set_tr_text(list_row_into(view, "system_keylock", keylock_open, 0), "system_keylock");
     pod_rows(win, "scroll_view_display", POD_WAKE, 1, lock_icon);
@@ -10364,7 +10361,7 @@ int ringnav_wm_paint(void *wm) {
  * (system("cmd_mcu write_str buzzer") when g_keytone_flag is set). Silent while headphones (either
  * jack) or a Bluetooth or USB output listen, since the buzzer is the device's own speaker;
  * hciplayer holds their PCM, so the click has no other way out. Playback alone leaves it clicking.
- * Click With Headphones (IPOD KEYTONEHP, off) keeps the buzzer clicking there too, as stock does;
+ * Click in Headphones (IPOD KEYTONEHP, off) keeps the buzzer clicking there too, as stock does;
  * Key Tone off is still silent.
  * The command waits out the buzzer and the MCU's park (tools/mcu_pwm_clock.c), so it runs on a
  * worker, not the UI thread; a click while one sounds is dropped, as the buzzer is busy anyway.
